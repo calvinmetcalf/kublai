@@ -1,0 +1,11 @@
+{
+    "name": "kublai"
+  , "version": "0.0.1"
+  , "dependencies": {
+      "express": "2.5.2"
+    , "jade": ">= 0.0.1"
+    , "coffee-script": ">= 0.0.1"
+    ,"sqlite3": ">= 0.0.1"
+    ,"sphericalmercator": "1.0.0"
+  }
+}
