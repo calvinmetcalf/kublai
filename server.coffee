@@ -1,7 +1,2 @@
-require('zappa') 'localhost', 7028, ->
-	@include 'gettile'
-
-
-  
-
-
+require('zappa') 'localhost', 7027, ->
+	@use static: __dirname + '/tiles'
