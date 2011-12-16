@@ -1,0 +1,11 @@
+{
+    "attribution": "", 
+    "description": "", 
+    "bounds": "-73.6139,41.1042,-69.6259,42.9645", 
+    "minzoom": "6", 
+    "version": "1.0.0", 
+    "template": "{{#__location__}}{{/__location__}}{{#__teaser__}}<img src=\"http://chart.apis.google.com/chart?chs=300x150&cht=p3&chco=FF0000|0000FF|008000|FF9900|990066|76A4FB&chd=t:{{{white}}},{{{black}}},{{{amindian}}},{{{asian}}},{{{other}}}&chds=a&chl=White|Black|Amindian|Asian|Other&chtt={{{name}}}\" width=\"300\" height=\"150\" alt=\"Race of Population\" />{{/__teaser__}}{{#__full__}}{{/__full__}}", 
+    "maxzoom": "12", 
+    "legend": "", 
+    "name": "gc"
+}

@@ -2,9 +2,8 @@
     "name": "kublai"
   , "version": "0.0.1"
   , "dependencies": {
-      "zappa": "0.3.x"
-      ,"coffee-script": "1.1.x"
-    ,"sqlite3": "2.x.x"
+      "coffee-script": "1.1.x"
+    "express": "2.5.2"
     ,"jade": "0.19.x"
   }
 }
