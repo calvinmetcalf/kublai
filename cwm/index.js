@@ -1,3 +1,4 @@
 module.exports = {
-    xyz: require('./xyz')
+    xyz: require('./xyz'),
+    mbtiles: require ('./mbtiles')
 };

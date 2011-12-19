@@ -9,7 +9,7 @@ kublai.configure ->
   kublai.use express.errorHandler()
 
 kublai.get "/:scheme(xyz|tms)/:tileset/:z/:x/:y.:format(png|jpg|jpeg)", cwm.xyz.getTile, (req, res) ->
-
+kublai.get "/:tileset/:z/:x/:y.:format(png|jpg|jpeg)", cwm.mbtiles.getTile, (req, res) ->
 kublai.error (err, req, res, next) ->
   res.send err.message, 500
       
