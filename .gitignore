@@ -1,3 +1,4 @@
 tiles/*.mbtiles
 node_modules
 *~
+*.beam
