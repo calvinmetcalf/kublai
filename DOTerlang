@@ -1,0 +1,1 @@
+code:add_patha(filename:join([filename:absname(""),modules,"erlang-sqlite3",ebin])).
