@@ -6,9 +6,9 @@ getTile(M,Z,X,Y)->
 sqlite3:close(Db),
 Tile.
 
-getInfo(M, K) ->
+getInfo(M) ->
 {ok, Db} = sqlite3:start_link(M,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
-[{columns,["value"]},{rows,[{V}]}] = sqlite3:sql_exec(Db, lists:concat(["SELECT value FROM metadata WHERE 'name' = ", K])),
+V = sqlite3:read_all(Db, metadata),
 sqlite3:close(Db),
 V.
 
