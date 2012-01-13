@@ -10,7 +10,7 @@ getInfo(M) ->
 {ok, Db} = sqlite3:start_link(M,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
 V = sqlite3:read_all(Db, metadata),
 sqlite3:close(Db),
-V.
+lists:map(fun({B,C})->{binary_to_list(B),binary_to_list(C)} end,element(2,hd(tl(V)))).
 
 getGrid(M,Z,X,Y)->
 {ok, Db} = sqlite3:start_link(M,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
