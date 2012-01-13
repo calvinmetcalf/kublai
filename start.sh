@@ -14,6 +14,10 @@ cp rebar/rebar misultin/rebar
 cd misultin
 ./rebar compile
 cd ..
+git clone git://github.com/mochi/mochiweb.git
+cd mochiweb
+make
+cd ..
 cd ..
 erlc kublai.erl
 cp DOTerlang .erlang
