@@ -1,7 +1,7 @@
 -module(kublai).
 -compile(export_all).
 getTile(M,Z,X,Y)->
-{ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
+Db = element(2,sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}])),
 [{columns,["tile_data"]},{rows,[{{blob,Tile}}]}] = sqlite3:sql_exec(Db, lists:concat(["SELECT tile_data FROM tiles WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
 sqlite3:close(Db),
 Tile.
@@ -14,6 +14,9 @@ sqlite3:close(Db),
 Original = lists:map(fun({B,C})->{binary_to_list(B),binary_to_list(C)} end,element(2,hd(tl(V)))),
 StingConverted = [ {X,list_to_binary(Y)} || {X,Y} <- Original ],
 mochijson2:encode(StingConverted).
+
+getGridJSON(M,Z,X,Y)->
+lists:append(getGrid(M,Z,X,Y),getKey(M,Z,X,Y)).
 
 getKey(M,Z,X,Y)->
 {ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
@@ -35,7 +38,19 @@ G.
 
 start(Port) ->
 	misultin:start_link([{port, Port}, {loop, fun(Req) -> handle_http(Req) end}]).
-
+	
+handleURL(U) ->
+L = string:tokens(U, "/"),
+M = list_to_atom(hd(L)),
+Z = list_to_integer(lists:nth(2,L)),
+X = list_to_integer(lists:nth(3,L)),
+Y = round(math:pow(2,Z) - list_to_integer(hd(string:tokens(lists:nth(4,L),"."))) - 1),
+F = list_to_atom(hd(tl(string:tokens(lists:nth(4,L),".")))),
+if
+F =:= png -> getTile(M,Z,X,Y);
+F =:= grid -> getGridJSON(M,Z,X,Y);
+true -> throw({badFormat, F})
+end.
 start() ->start(7027).
 stop() ->
 	misultin:stop().
