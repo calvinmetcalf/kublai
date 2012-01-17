@@ -15,26 +15,17 @@ Original = lists:map(fun({B,C})->{binary_to_list(B),binary_to_list(C)} end,eleme
 StingConverted = [ {X,list_to_binary(Y)} || {X,Y} <- Original ],
 mochijson2:encode(StingConverted).
 
-getGridJSON(M,Z,X,Y)->
-lists:append(getGrid(M,Z,X,Y),getKey(M,Z,X,Y)).
-
-getKey(M,Z,X,Y)->
-{ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
-[{columns,["key_name","key_json"]},{rows,Key}] = sqlite3:sql_exec(Db, lists:concat(["select key_name, key_json FROM grid_data WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
-sqlite3:close(Db),
-Key,
-StingConverted = [ {binary_to_list(X1),Y1} || {X1,Y1} <- Key ],
-mochijson2:encode(StingConverted).
-
 getGrid(M,Z,X,Y)->
 {ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
 [{columns,["grid"]},{rows,[{{blob,Grid}}]}] = sqlite3:sql_exec(Db, lists:concat(["SELECT grid FROM grids WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
+[{columns,["key_name","key_json"]},{rows,Key}] = sqlite3:sql_exec(Db, lists:concat(["select key_name, key_json FROM grid_data WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
 sqlite3:close(Db),
 A = zlib:open(),
 zlib:inflateInit(A),
 G = zlib:inflate(A, Grid),
 zlib:inflateEnd(A),
-G.
+StingConverted = [ {binary_to_list(X1),Y1} || {X1,Y1} <- Key ],
+lists:append(G,mochijson2:encode(StingConverted)).
 
 start(Port) ->
 	misultin:start_link([{port, Port}, {loop, fun(Req) -> handle_http(Req) end}]).
@@ -48,7 +39,7 @@ Y = round(math:pow(2,Z) - list_to_integer(hd(string:tokens(lists:nth(4,L),".")))
 F = list_to_atom(hd(tl(string:tokens(lists:nth(4,L),".")))),
 if
 F =:= png -> getTile(M,Z,X,Y);
-F =:= grid -> getGridJSON(M,Z,X,Y);
+F =:= grid -> getGrid(M,Z,X,Y);
 true -> throw({badFormat, F})
 end.
 start() ->start(7027).
