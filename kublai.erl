@@ -98,34 +98,60 @@ end.
 start(Port) ->
 	misultin:start_link([{port, Port}, {loop, fun(Req) -> handle_http(Req) end}]).
 	
-handleURL(U) ->
-L = string:tokens(U, "/"),
-if
-length(L) =:= 4 ->
-M = list_to_atom(hd(L)),
-Z = list_to_integer(lists:nth(2,L)),
-X = list_to_integer(lists:nth(3,L)),
-Y = round(math:pow(2,Z) - list_to_integer(hd(string:tokens(lists:nth(4,L),"."))) - 1),
-F = list_to_atom(hd(tl(string:tokens(lists:nth(4,L),".")))),
-if
-F =:= png -> getTile(M,Z,X,Y);
-F =:= grid -> getGrid(M,Z,X,Y);
-true -> throw({badFormat, F})
-end;
-length(L) =:= 1 ->
-[H , "jsonp"] = string:tokens(hd(L),"."),
-M = list_to_atom(H),
-getInfo(M)
-end.
 start() ->start(7027).
 stop() ->
 	misultin:stop().
-
+flipY(Y,Z) ->
+try round(math:pow(2,Z) - Y - 1)
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end.
 
 handle_http(Req) ->
-	handle(Req:get(method), Req:get(uri_unquoted), Req).
+	handle(Req:get(method), Req:resource([lowercase, urldecode]), Req).
+
 	
+handle('GET', [], Req) ->
+	template(Req, "Main  home page.");
 
 
-handle('GET', U, Req) ->
-	Req:ok(handleURL(U)).
+handle('GET', [M], Req) ->
+try string:tokens(M,".") of
+[H, "jsonp"] -> info(Req, H)
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end;
+
+handle('GET', [M,Z,X,T], Req) ->
+try string:tokens(T,".") of
+[H, "png"] -> tile(Req, list_to_atom(M),list_to_integer(Z),list_to_integer(X),list_to_integer(H));
+[H, "grid", "json"] -> grid(Req, list_to_atom(M),list_to_integer(Z),list_to_integer(X),list_to_integer(H))
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end;
+
+handle(_, _, Req) ->
+	template(Req, "Page not found.").
+
+info(Req, M) ->
+	Req:ok([{"Content-Type", "application/json"}], getInfo(M)).	
+
+tile(Req, M, Z, X, H) ->
+Y = flipY(H,Z),
+	Req:ok([{"Content-Type", "image/png"}], getTile(M,Z,X,Y)).
+
+grid(Req, M, Z, X, H) ->
+Y = flipY(H,Z),
+	Req:ok([{"Content-Type", "application/json"}], getGrid(M,Z,X,Y)).
+
+template(Req, Content) ->
+	Req:ok([{"Content-Type", "text/html"}], ["<head>
+		<meta http-equiv = \"content-type\" content=\"text/html; charset=UTF-8\">
+	</head><body>", Content, "</body></html>"]).	
+
