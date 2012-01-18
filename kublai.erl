@@ -69,15 +69,31 @@ case sqlite3:sql_exec(D, lists:concat(["select key_name, key_json FROM grid_data
 true -> throw(noSuchKey)
 end.
 
-getInfo(M) ->
-{ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
-V = sqlite3:read_all(Db, metadata),
-sqlite3:close(Db),
+fetchInfo(D) ->
+try sqlite3:read_all(D, metadata)
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end.
+
+cleanInfo(D)->
+V = fetchInfo(D),
 %with much thanks to http://stackoverflow.com/questions/3923400/erlang-tuple-list-into-json for the following
 Original = lists:map(fun({B,C})->{binary_to_list(B),binary_to_list(C)} end,element(2,hd(tl(V)))),
 StingConverted = [ {X,list_to_binary(Y)} || {X,Y} <- Original ],
 mochijson2:encode(StingConverted).
 
+getInfo(M) ->
+D = openMBTILES(M),
+try cleanInfo(D)
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+after
+sqlite3:close(D)
+end.
 
 start(Port) ->
 	misultin:start_link([{port, Port}, {loop, fun(Req) -> handle_http(Req) end}]).
