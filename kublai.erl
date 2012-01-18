@@ -32,6 +32,8 @@ start(Port) ->
 	
 handleURL(U) ->
 L = string:tokens(U, "/"),
+if
+length(L) =:= 4 ->
 M = list_to_atom(hd(L)),
 Z = list_to_integer(lists:nth(2,L)),
 X = list_to_integer(lists:nth(3,L)),
@@ -41,6 +43,11 @@ if
 F =:= png -> getTile(M,Z,X,Y);
 F =:= grid -> getGrid(M,Z,X,Y);
 true -> throw({badFormat, F})
+end;
+length(L) =:= 1 ->
+[H , "jsonp"] = string:tokens(hd(L),"."),
+M = list_to_atom(H),
+getInfo(M)
 end.
 start() ->start(7027).
 stop() ->
