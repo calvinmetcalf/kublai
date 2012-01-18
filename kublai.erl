@@ -55,25 +55,9 @@ stop() ->
 
 
 handle_http(Req) ->
-
-	handle(Req:get(method), Req:resource([urldecode]), Req).
-
-
-handle('GET', [], Req) ->
-	Req:ok([{"Content-Type", "text/plain"}], "Main home page.");
-
-
-handle('GET', ["tile", Map, Zoom, X, Y], Req) ->
-	tile(Req, Map, Zoom, X, Y);
-
-handle('GET', ["info", Map], Req) ->
-	info(Req, Map);
-
-
-handle(_, _, Req) ->
-	Req:ok([{"Content-Type", "text/plain"}], "OH NOES!").
+	handle(Req:get(method), Req:get(uri_unquoted), Req).
 	
-tile(Req, Map, Zoom, X, Y) ->
-	Req:ok([{"Content-Type", "image/png"}], getTile(Map, Zoom, X, Y)).
-info(Req, Map) ->
-	Req:ok([{"Content-Type", "application/json"}], getInfo(Map)).
+
+
+handle('GET', U, Req) ->
+	Req:ok(handleURL(U)).
