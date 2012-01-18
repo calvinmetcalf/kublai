@@ -1,10 +1,73 @@
 -module(kublai).
 -compile(export_all).
-getTile(M,Z,X,Y)->
-Db = element(2,sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}])),
-[{columns,["tile_data"]},{rows,[{{blob,Tile}}]}] = sqlite3:sql_exec(Db, lists:concat(["SELECT tile_data FROM tiles WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
-sqlite3:close(Db),
-Tile.
+
+getTile(M,Z,X,Y) ->
+D = openMBTILES(M),
+try fetchTile(D,Z,X,Y)
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+after
+sqlite3:close(D)
+end.
+
+getTilePath(M) ->
+filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])]).
+
+checkMBTILES(M) ->
+filelib:is_file(getTilePath(M)).
+
+openMBTILES(M) ->
+case checkMBTILES(M) of
+true -> element(2,sqlite3:start_link(m,[{file, getTilePath(M)}]));
+false -> throw(noSuchTileset)
+end.
+
+getGrid(M,Z,X,Y)->
+D = openMBTILES(M),
+try lists:append(cleanGrid(D,Z,X,Y),cleanKey(D,Z,X,Y))
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+after
+sqlite3:close(D)
+end.
+
+fetchTile(D,Z,X,Y) ->
+case sqlite3:sql_exec(D, lists:concat(["SELECT tile_data FROM tiles WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])) of
+[{columns,["tile_data"]},{rows,[{{blob,Tile}}]}] -> Tile;
+[{columns,["tile_data"]},{rows,[]}] -> throw(noSuchTile);
+true -> throw(noSuchTile)
+end.
+
+cleanGrid(D,Z,X,Y) ->
+G = fetchGrid(D,Z,X,Y),
+A = zlib:open(),
+zlib:inflateInit(A),
+Grid = zlib:inflate(A, G),
+zlib:inflateEnd(A),
+Grid.
+
+cleanKey(D,Z,X,Y) ->
+K = fetchKey(D,Z,X,Y),
+StingConverted = [ {binary_to_list(X1),Y1} || {X1,Y1} <- K ],
+mochijson2:encode(StingConverted).
+
+fetchGrid(D,Z,X,Y) ->
+case sqlite3:sql_exec(D, lists:concat(["SELECT grid FROM grids WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])) of
+[{columns,["grid"]},{rows,[{{blob,Grid}}]}] -> Grid;
+[{columns,["grid"]},{rows,[]}] -> throw(noSuchGrid);
+true -> throw(noSuchGrid)
+end.
+
+fetchKey(D,Z,X,Y) ->
+case sqlite3:sql_exec(D, lists:concat(["select key_name, key_json FROM grid_data WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])) of
+[{columns,["key_name","key_json"]},{rows,Key}] -> Key;
+[{columns,["key_name","key_json"]},{rows,[]}] -> throw(noSuchKey);
+true -> throw(noSuchKey)
+end.
 
 getInfo(M) ->
 {ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
@@ -15,17 +78,6 @@ Original = lists:map(fun({B,C})->{binary_to_list(B),binary_to_list(C)} end,eleme
 StingConverted = [ {X,list_to_binary(Y)} || {X,Y} <- Original ],
 mochijson2:encode(StingConverted).
 
-getGrid(M,Z,X,Y)->
-{ok, Db} = sqlite3:start_link(m,[{file, filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])])}]),
-[{columns,["grid"]},{rows,[{{blob,Grid}}]}] = sqlite3:sql_exec(Db, lists:concat(["SELECT grid FROM grids WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
-[{columns,["key_name","key_json"]},{rows,Key}] = sqlite3:sql_exec(Db, lists:concat(["select key_name, key_json FROM grid_data WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])),
-sqlite3:close(Db),
-A = zlib:open(),
-zlib:inflateInit(A),
-G = zlib:inflate(A, Grid),
-zlib:inflateEnd(A),
-StingConverted = [ {binary_to_list(X1),Y1} || {X1,Y1} <- Key ],
-lists:append(G,mochijson2:encode(StingConverted)).
 
 start(Port) ->
 	misultin:start_link([{port, Port}, {loop, fun(Req) -> handle_http(Req) end}]).
