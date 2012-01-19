@@ -119,7 +119,8 @@ handle('GET', [], Req) ->
 
 handle('GET', [M], Req) ->
 try string:tokens(M,".") of
-[H, "jsonp"] -> info(Req, H)
+[H, "jsonp"] -> info(Req, H);
+["favicon", "ico"] -> favicon(Req)
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
@@ -140,15 +141,37 @@ handle(_, _, Req) ->
 	template(Req, "Page not found.").
 
 info(Req, M) ->
-	Req:ok([{"Content-Type", "application/json"}], getInfo(M)).	
+try getInfo(M) of
+P -> Req:respond(200,[{"Content-Type", "application/json"}],P)
+catch
+throw:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
+error:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
+exit:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E)
+end.	
 
 tile(Req, M, Z, X, H) ->
 Y = flipY(H,Z),
-	Req:ok([{"Content-Type", "image/png"}], getTile(M,Z,X,Y)).
+try getTile(M,Z,X,Y) of
+P -> Req:respond(200,[{"Content-Type", "image/png"}],P)
+catch
+throw:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
+error:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
+exit:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E)
+end.
 
 grid(Req, M, Z, X, H) ->
 Y = flipY(H,Z),
-	Req:ok([{"Content-Type", "application/json"}], getGrid(M,Z,X,Y)).
+try getGrid(M,Z,X,Y) of
+P -> Req:respond(200,[{"Content-Type", "application/json"}],P)
+catch
+throw:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
+error:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
+exit:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E)
+end.
+
+favicon(Req) ->
+{ok,F} = file:read_file(favicon.ico),
+Req:ok([{"Content-Type", "image/vnd.microsoft.icon"}],F).
 
 template(Req, Content) ->
 	Req:ok([{"Content-Type", "text/html"}], ["<head>
