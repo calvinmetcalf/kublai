@@ -95,6 +95,17 @@ after
 sqlite3:close(D)
 end.
 
+makeJSONP(M) ->
+A = [103,114,105,100,40],
+B = getInfo(M),
+C = [41,59],
+try lists:append([A,B,C])
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end.
+
 start(Port) ->
 	misultin:start_link([{port, Port}, {loop, fun(Req) -> handle_http(Req) end}]).
 	
@@ -120,7 +131,8 @@ handle('GET', [], Req) ->
 handle('GET', [M], Req) ->
 try string:tokens(M,".") of
 [H, "jsonp"] -> info(Req, H);
-["favicon", "ico"] -> favicon(Req)
+["favicon", "ico"] -> favicon(Req);
+[_,_] ->Req:respond(404,[{"Content-Type", "text/plain"}],"I have no idea what your trying to do")
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
@@ -130,7 +142,8 @@ end;
 handle('GET', [M,Z,X,T], Req) ->
 try string:tokens(T,".") of
 [H, "png"] -> tile(Req, list_to_atom(M),list_to_integer(Z),list_to_integer(X),list_to_integer(H));
-[H, "grid", "json"] -> grid(Req, list_to_atom(M),list_to_integer(Z),list_to_integer(X),list_to_integer(H))
+[H, "grid", "json"] -> grid(Req, list_to_atom(M),list_to_integer(Z),list_to_integer(X),list_to_integer(H));
+[_, _] -> Req:respond(404,[{"Content-Type", "text/plain"}],"Format Not Supported")
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
@@ -141,7 +154,7 @@ handle(_, _, Req) ->
 	template(Req, "Page not found.").
 
 info(Req, M) ->
-try getInfo(M) of
+try makeJSONP(M) of
 P -> Req:respond(200,[{"Content-Type", "application/json"}],P)
 catch
 throw:E -> Req:respond(404,[{"Content-Type", "text/plain"}],E);
