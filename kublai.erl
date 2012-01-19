@@ -26,7 +26,7 @@ end.
 
 getGrid(M,Z,X,Y)->
 D = openMBTILES(M),
-try lists:append(cleanGrid(D,Z,X,Y),cleanKey(D,Z,X,Y))
+try lists:append([cleanerGrid(D,Z,X,Y),cleanKey(D,Z,X,Y),[125,41,59]])
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
@@ -41,6 +41,22 @@ case sqlite3:sql_exec(D, lists:concat(["SELECT tile_data FROM tiles WHERE zoom_l
 [{columns,["tile_data"]},{rows,[]}] -> throw(noSuchTile);
 true -> throw(noSuchTile)
 end.
+
+cleanerGrid(D,Z,X,Y) ->
+G = cleanGrid(D,Z,X,Y),
+L = hd(lists:reverse(G)),
+R = tl(lists:reverse(G)),
+Len = size(L),
+C = binary_to_list(L,1,Len-1),
+W = lists:append([C,[44,34,100,97,116,97,34,58]]),
+I = list_to_binary(W),
+try lists:reverse(lists:append([[I],R,[40,100,105,114,103]]))
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end.
+
 
 cleanGrid(D,Z,X,Y) ->
 G = fetchGrid(D,Z,X,Y),
