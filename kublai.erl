@@ -26,7 +26,7 @@ end.
 
 getGrid(M,Z,X,Y)->
 D = openMBTILES(M),
-try lists:append([cleanerGrid(D,Z,X,Y),cleanerKey(D,Z,X,Y),[125,41,59]])
+try lists:append([cleanerGrid(D,Z,X,Y),cleanerKey(D,Z,X,Y),[125,125,41,59]])
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
@@ -76,7 +76,7 @@ Grid.
 
 cleanKey(D,Z,X,Y) ->
 K = fetchKey(D,Z,X,Y),
-try lists:flatten(lists:map(fun({A,B}) -> [A,58,B,44] end, K))
+try lists:flatten(lists:map(fun({A,B}) -> [34,A,34,58,B,44] end, K))
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
