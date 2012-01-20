@@ -26,7 +26,7 @@ end.
 
 getGrid(M,Z,X,Y)->
 D = openMBTILES(M),
-try lists:append([cleanerGrid(D,Z,X,Y),cleanKey(D,Z,X,Y),[125,41,59]])
+try lists:append([cleanerGrid(D,Z,X,Y),cleanerKey(D,Z,X,Y),[125,41,59]])
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
@@ -48,7 +48,7 @@ L = hd(lists:reverse(G)),
 R = tl(lists:reverse(G)),
 Len = size(L),
 C = binary_to_list(L,1,Len-1),
-W = lists:append([C,[44,34,100,97,116,97,34,58]]),
+W = lists:append([C,[44,34,100,97,116,97,34,58,123]]),
 I = list_to_binary(W),
 try lists:reverse(lists:append([[I],R,[40,100,105,114,103]]))
 catch
@@ -57,6 +57,14 @@ error:E -> throw(E);
 exit:E -> throw(E)
 end.
 
+cleanerKey(D,Z,X,Y) ->
+K = cleanKey(D,Z,X,Y),
+try lists:reverse(tl(lists:reverse(K)))
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end.
 
 cleanGrid(D,Z,X,Y) ->
 G = fetchGrid(D,Z,X,Y),
@@ -68,8 +76,12 @@ Grid.
 
 cleanKey(D,Z,X,Y) ->
 K = fetchKey(D,Z,X,Y),
-StingConverted = [ {binary_to_list(X1),Y1} || {X1,Y1} <- K ],
-mochijson2:encode(StingConverted).
+try lists:flatten(lists:map(fun({A,B}) -> [A,58,B,44] end, K))
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
+end.
 
 fetchGrid(D,Z,X,Y) ->
 case sqlite3:sql_exec(D, lists:concat(["SELECT grid FROM grids WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])) of
