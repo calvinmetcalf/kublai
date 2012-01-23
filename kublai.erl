@@ -26,13 +26,21 @@ end.
 
 getGrid(M,Z,X,Y)->
 D = openMBTILES(M),
-try lists:append([cleanerGrid(D,Z,X,Y),cleanerKey(D,Z,X,Y),[125,125,41,59]])
+try fetchGrids(D,Z,X,Y)
 catch
 throw:E -> throw(E);
 error:E -> throw(E);
 exit:E -> throw(E)
 after
 sqlite3:close(D)
+end.
+
+fetchGrids(D,Z,X,Y) ->
+try lists:append([cleanerGrid(D,Z,X,Y),cleanerKey(D,Z,X,Y),[125,125,41,59]])
+catch
+throw:E -> throw(E);
+error:E -> throw(E);
+exit:E -> throw(E)
 end.
 
 fetchTile(D,Z,X,Y) ->
