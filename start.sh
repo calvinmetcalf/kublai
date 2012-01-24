@@ -20,4 +20,5 @@ make
 cd ..
 cd ..
 erlc kublai.erl
+erlc ks.erl
 cp DOTerlang .erlang
