@@ -32,5 +32,5 @@ ks.erl is for use with couchdb, running
 
 	ks:dump(mpo). 
 
-will dump every single tile from the mpo tileset into the couchdb database called mpo, currently it, like the rest of it assumes the tileset is located in the tile folder, that you want the datavase to be named the same as the tile file, and that you have admin party turned on (whoch is bad to do).
+will dump every single tile from the mpo tileset into the couchdb database called mpo, currently it, like the rest of it assumes the tileset is located in the tile folder, that you want the datavase to be named the same as the tile file, if you have a database at a location other then 127.0.0.1:5984 (like you have a read one with a password and what not) you can change that in the config.dat file.
 

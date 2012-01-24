@@ -29,7 +29,7 @@ newCdb(M) ->
 element(1,httpc:request(put, {lists:concat(["http://127.0.0.1:5984/",M]),[],"",""},[],[])).
 
 iTile(D,M,Z,X,Y) ->
-httpc:request(put, {lists:concat(["http://127.0.0.1:5984/",M,"/z",Z,"x",X,"y",Y,"t/attachment"]),[],"image/png",kublai:fetchTile(D,Z,X,Y)},[],[{sync, false}]).
+httpc:request(put, {lists:concat([getHost(),"/",M,"/z",Z,"x",X,"y",Y,"t/attachment"]),[],"image/png",kublai:fetchTile(D,Z,X,Y)},[],[{sync, false}]).
 
 iGrid(D,M,Z,X,Y) ->
 httpc:request(put, {lists:concat(["http://127.0.0.1:5984/",M,"/z",Z,"x",X,"y",Y,"g/attachment"]),[],"application/json",kublai:fetchGrids(D,Z,X,Y)},[],[{sync, false}]).
@@ -67,5 +67,12 @@ lists:map(fun(Q) -> dumpp2(D,M,Q) end, for(zmin(D),zmax(D))).
 
 dumpp2(D,M,Z) ->
 lists:map(fun(Q) -> spawn(fun() -> dump3(D,M,Z,Q) end) end, for(xmin(D,Z),xmax(D,Z))).
+
+getHost() ->
+{ok, S} = file:open("config.dat", read),
+H = element(2,io:read(S,'')),
+file:close(S),
+H.
+
 
 
