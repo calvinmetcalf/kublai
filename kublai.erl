@@ -38,9 +38,9 @@ end.
 fetchGrids(D,Z,X,Y) ->
 try lists:append([cleanerGrid(D,Z,X,Y),cleanerKey(D,Z,X,Y),[125,125,41,59]])
 catch
-throw:E -> throw(E);
-error:E -> throw(E);
-exit:E -> throw(E)
+throw:_E -> [];
+error:_E -> [];
+exit:_E -> []
 end.
 
 fetchTile(D,Z,X,Y) ->

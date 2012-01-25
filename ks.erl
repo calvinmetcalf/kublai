@@ -28,10 +28,29 @@ ymax(D, Z, X) -> y(D, max, Z, X).
 newCdb(M) ->
 element(1,httpc:request(put, {lists:concat([getHost(),"/",M]),[],"",""},[],[])).
 
+deleteCdb(M) -> httpc:request(delete, {lists:concat([getHost(),"/",M]),[]},[],[]).
+
 
 iTile(D,T,Z,X,Y) ->
-ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"g"]),kublai:fetchTile(D,Z,X,Y)}).
+ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"t"]),kublai:fetchTile(D,Z,X,Y)}).
 
+iGrid(D,T,Z,X,Y) ->
+ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"g"]),list_to_binary(kublai:fetchGrids(D,Z,X,Y))}).
+
+dumpGrid(M) ->
+D = kublai:openMBTILES(M),
+T = ets:new(M,[]),
+try lists:usort(lists:flatten(lists:map(fun(Q) -> dumpGrid(D,T,Q) end, for(1,zmax(D))))) of
+[true] -> uploadGrid(T,M)
+after
+sqlite3:close(D)
+end.
+
+dumpGrid(D,T,Z) ->
+lists:map(fun(Q) -> dumpGrid(D,T,Z,Q) end, for(xmin(D,Z),xmax(D,Z))).
+
+dumpGrid(D,T,Z,X) ->
+lists:map(fun(Q) -> iGrid(D,T,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))).
 
 dump(M) ->
 D = kublai:openMBTILES(M),
@@ -57,5 +76,14 @@ H.
 upload(T,M) ->
 inets:start(),
 newCdb(M),
-lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment%3Fbatch%3Dok"]),[],"image/png",B},[],[{sync,false}]) end, ets:tab2list(T)).
+try lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment"]),[],"image/png",B},[],[]) end, ets:tab2list(T))
+after
+inets:stop()
+end.
 
+uploadGrid(T,M) ->
+inets:start(),
+try lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment"]),[],"application/json",B},[],[]) end, ets:tab2list(T))
+after
+inets:stop()
+end.
