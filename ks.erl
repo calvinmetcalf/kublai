@@ -26,47 +26,27 @@ ymin(D, Z, X) -> y(D, min, Z, X).
 ymax(D, Z, X) -> y(D, max, Z, X).
 
 newCdb(M) ->
-element(1,httpc:request(put, {lists:concat(["http://127.0.0.1:5984/",M]),[],"",""},[],[])).
+element(1,httpc:request(put, {lists:concat([getHost(),"/",M]),[],"",""},[],[])).
 
-iTile(D,M,Z,X,Y) ->
-httpc:request(put, {lists:concat([getHost(),"/",M,"/z",Z,"x",X,"y",Y,"t/attachment"]),[],"image/png",kublai:fetchTile(D,Z,X,Y)},[],[{sync, false}]).
 
-iGrid(D,M,Z,X,Y) ->
-httpc:request(put, {lists:concat(["http://127.0.0.1:5984/",M,"/z",Z,"x",X,"y",Y,"g/attachment"]),[],"application/json",kublai:fetchGrids(D,Z,X,Y)},[],[{sync, false}]).
+iTile(D,T,Z,X,Y) ->
+ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"g"]),kublai:fetchTile(D,Z,X,Y)}).
 
-dumpBoth(M) ->
-D = kublai:openMBTILES(M),
-inets:start(),
-newCdb(M),
-lists:map(fun(Q) -> dumpBoth2(D,M,Q) end, for(zmin(D),zmax(D))).
-
-dumpBoth2(D,M,Z) ->
-lists:map(fun(Q) -> dumpBoth3(D,M,Z,Q) end, for(xmin(D,Z),xmax(D,Z))).
-
-dumpBoth3(D,M,Z,X) ->
-lists:map(fun(Q) -> iTile(D,M,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))),
-lists:map(fun(Q) -> iGrid(D,M,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))).
 
 dump(M) ->
 D = kublai:openMBTILES(M),
-inets:start(),
-newCdb(M),
-lists:map(fun(Q) -> dump2(D,M,Q) end, for(zmin(D),zmax(D))).
+T = ets:new(M,[]),
+try lists:usort(lists:flatten(lists:map(fun(Q) -> dump(D,T,Q) end, for(zmin(D),zmax(D))))) of
+[true] -> upload(T,M)
+after
+sqlite3:close(D)
+end.
 
-dump2(D,M,Z) ->
-lists:map(fun(Q) -> dump3(D,M,Z,Q) end, for(xmin(D,Z),xmax(D,Z))).
+dump(D,T,Z) ->
+lists:map(fun(Q) -> dump(D,T,Z,Q) end, for(xmin(D,Z),xmax(D,Z))).
 
-dump3(D,M,Z,X) ->
-lists:map(fun(Q) -> iTile(D,M,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))).
-
-dumpp(M) ->
-D = kublai:openMBTILES(M),
-inets:start(),
-newCdb(M),
-lists:map(fun(Q) -> dumpp2(D,M,Q) end, for(zmin(D),zmax(D))).
-
-dumpp2(D,M,Z) ->
-lists:map(fun(Q) -> spawn(fun() -> dump3(D,M,Z,Q) end) end, for(xmin(D,Z),xmax(D,Z))).
+dump(D,T,Z,X) ->
+lists:map(fun(Q) -> iTile(D,T,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))).
 
 getHost() ->
 {ok, S} = file:open("config.dat", read),
@@ -74,5 +54,8 @@ H = element(2,io:read(S,'')),
 file:close(S),
 H.
 
-
+upload(T,M) ->
+inets:start(),
+newCdb(M),
+lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment%3Fbatch%3Dok"]),[],"image/png",B},[],[{sync,false}]) end, ets:tab2list(T)).
 
