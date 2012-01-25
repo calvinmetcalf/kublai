@@ -83,7 +83,7 @@ end.
 
 uploadGrid(T,M) ->
 inets:start(),
-try lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment"]),[],"application/json",B},[],[]) end, ets:tab2list(T))
+try lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment"]),[],"text/javascript",B},[],[]) end, ets:tab2list(T))
 after
 inets:stop()
 end.
