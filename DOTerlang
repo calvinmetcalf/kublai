@@ -1,4 +1,4 @@
 code:add_patha(filename:join([filename:absname(""),modules,"erlang-sqlite3",ebin])).
 code:add_patha(filename:join([filename:absname(""),modules,"misultin",ebin])).
-code:add_patha(filename:join([filename:absname(""),modules,"mochiweb",ebin])).
+code:add_patha(filename:join([filename:absname(""),modules,"couchbeam","deps","mochiweb",ebin])).
 code:add_patha(filename:join([filename:absname(""),modules,"couchbeam",ebin])).

@@ -25,8 +25,8 @@ ymin(D, Z, X) -> y(D, min, Z, X).
 
 ymax(D, Z, X) -> y(D, max, Z, X).
 
-newCdb(M) ->
-element(1,httpc:request(put, {lists:concat([getHost(),"/",M]),[],"",""},[],[])).
+newCdb(M,S) ->
+couchbeam:create_db(S, atom_to_list(M)).
 
 deleteCdb(M) -> httpc:request(delete, {lists:concat([getHost(),"/",M]),[]},[],[]).
 
@@ -40,7 +40,7 @@ ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"g"]),list_to_binary(kublai:fetchG
 dumpGrid(M) ->
 D = kublai:openMBTILES(M),
 T = ets:new(M,[]),
-try lists:usort(lists:flatten(lists:map(fun(Q) -> dumpGrid(D,T,Q) end, for(1,zmax(D))))) of
+try lists:usort(lists:flatten(lists:map(fun(Q) -> dumpGrid(D,T,Q) end, for(zmin(D),zmax(D))))) of
 [true] -> uploadGrid(T,M)
 after
 sqlite3:close(D)
@@ -74,16 +74,21 @@ file:close(S),
 H.
 
 upload(T,M) ->
-inets:start(),
-newCdb(M),
-try lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment"]),[],"image/png",B},[],[]) end, ets:tab2list(T))
+couchbeam:start(),
+S = couchbeam:server_connection(),
+couchbeam:create_db(S, atom_to_list(M)),
+{ok,Dd} = couchbeam:open_db(S, atom_to_list(M)),
+try lists:foreach(fun({A,B}) -> couchbeam:put_attachment(Dd,A,"tile.png",B,[{content_type, "image/png"}]) end, ets:tab2list(T))
 after
-inets:stop()
+couchbeam:stop()
 end.
 
 uploadGrid(T,M) ->
-inets:start(),
-try lists:foreach(fun({A,B}) -> httpc:request(put, {lists:concat([getHost(),"/",M,"/",A,"/attachment"]),[],"text/javascript",B},[],[]) end, ets:tab2list(T))
+couchbeam:start(),
+S = couchbeam:server_connection(),
+{ok,Dd} = couchbeam:open_db(S, atom_to_list(M)),
+try lists:foreach(fun({A,B}) -> couchbeam:put_attachment(Dd,A,"grid",B,[{content_type, "text/javascript"}]) end, ets:tab2list(T))
 after
-inets:stop()
+couchbeam:stop()
 end.
+

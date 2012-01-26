@@ -14,10 +14,6 @@ cp rebar/rebar misultin/rebar
 cd misultin
 ./rebar compile
 cd ..
-git clone git://github.com/mochi/mochiweb.git
-cd mochiweb
-make
-cd ..
 git clone git://github.com/benoitc/couchbeam.git
 cd couchbeam
 make
