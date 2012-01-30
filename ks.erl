@@ -86,9 +86,61 @@ end.
 uploadGrid(T,M) ->
 couchbeam:start(),
 S = couchbeam:server_connection(),
+couchbeam:create_db(S, atom_to_list(M)),
 {ok,Dd} = couchbeam:open_db(S, atom_to_list(M)),
-try lists:foreach(fun({A,B}) -> couchbeam:put_attachment(Dd,A,"grid",B,[{content_type, "text/javascript"}]) end, ets:tab2list(T))
+try lists:foreach(fun({A,B}) -> couchbeam:put_attachment(Dd,A,"grid",B,[{content_type, "application/javascript"}]) end, ets:tab2list(T))
 after
 couchbeam:stop()
 end.
 
+
+nDump(M,tiles) ->
+D = kublai:openMBTILES(M),
+try sqlite3:read_all(D,tiles) of
+[{columns,["zoom_level","tile_column","tile_row","tile_data"]},{rows,L}] -> L
+after
+sqlite3:close(D)
+end;
+nDump(M,grids) ->
+D = kublai:openMBTILES(M),
+try sqlite3:read_all(D,grids) of
+[{columns,["zoom_level","tile_column","tile_row","grid"]},{rows,Grid}] -> Grid
+after
+sqlite3:close(D)
+end;
+nDump(M,key) ->
+D = kublai:openMBTILES(M),
+try sqlite3:read_all(D,grid_data) of
+[{columns,["zoom_level","tile_column","tile_row","key_name","key_json"]},{rows,Key}] -> Key
+after
+sqlite3:close(D)
+end.
+
+nMap(M,key) ->
+L = nDump(M,key),
+lists:map(fun({A,B,C,D,E}) -> {{A,B,C},{D,E}} end, L);
+nMap(M,V) ->
+L = nDump(M,V),
+lists:map(fun({A,B,C,{blob,D}}) -> {{A,B,C},D} end, L).
+
+nUpload(M,tiles) ->
+L = nMap(M,tiles),
+couchbeam:start(),
+S = couchbeam:server_connection(),
+{ok,Dd} = couchbeam:open_or_create_db(S, atom_to_list(M)),
+try lists:usort(lists:map(fun({{Z,X,Y},B}) -> element(1,couchbeam:put_attachment(Dd,lists:concat(["z",Z,"x",X,"y",Y,"t"]),"tile",B,[{content_type, "image/png"}])) end,L)) of
+[ok] -> couchbeam:stop()
+catch
+throw:X -> X
+end;
+nUpload(M,grids) ->
+L = nMap(M,grids),
+couchbeam:start(),
+S = couchbeam:server_connection(),
+{ok,Dd} = couchbeam:open_or_create_db(S, atom_to_list(M)),
+try lists:usort(lists:map(fun({{Z,X,Y},B}) -> element(1,couchbeam:put_attachment(Dd,lists:concat(["z",Z,"x",X,"y",Y,"g"]),"grid",B,[{content_type, "text/javascript"}])) end,L)) 
+catch
+throw:X -> X;
+exit:X -> X;
+error:X -> X
+end.
