@@ -1,146 +1,81 @@
 -module(ks).
--compile(export_all).
+-export([dumpTile/1]).
 
-for(Max, Max, F) -> [F(Max)];
-for(I, Max, F) -> [F(I)|for(I+1, Max, F)].
-for(Min, Max) -> for(Min, Max, fun(I) -> I end).
+dumpTile(M) ->
+D = openMBTILES(M),
+couchbeam:start(),
+S = couchbeam:server_connection(),
+{ok, Db} = couchbeam:open_or_create_db(S, atom_to_list(M)),
+try dumpTile({M,S,Db},D,zmin(D),zmax(D))
+after
+couchbeam:stop(),
+sqlite3:close(D)
+end.
+
+dumpTile(_Stuff,_D,Max,Max)->
+ok;
+dumpTile(Stuff,D,Z,_)->
+dumpTile(Stuff,D,Z,xmin(D,Z),xmax(D,Z)).
+
+dumpTile(Stuff,D,Z,Max,Max)->
+dumpTile(Stuff,D,Z+1,zmax(D));
+dumpTile(Stuff,D,Z,X,_)->
+dumpTile(Stuff,D,Z,X,ymin(D,Z,X),ymax(D,Z,X)).
+
+dumpTile(Stuff,D,Z,X,Max,Max)->
+dumpTile(Stuff,D,Z,X+1, xmax(D,Z));
+dumpTile({M,S,Db},D,Z,X,Y,Max)->
+case putTile(Db,getName(Z,X,Y),fetchTile(D,Z,X,Y)) of
+{ok,_}->dumpTile({M,S,Db},D,Z,X,Y+1,Max)
+end.
+
+putTile(Db,N,T) ->
+couchbeam:put_attachment(Db,N,"tile",T,[{content_type, "image/png"}]).
+
+getName(Z,X,Y)->
+lists:concat(["z",Z,"x",X,"y",flipY(Y,Z),"t"]).
+
+flipY(Y,Z) ->
+round(math:pow(2,Z) - Y - 1).
 
 z(D, End) ->
 element(1,hd(element(2,hd(tl(sqlite3:sql_exec(D, lists:concat(["SELECT ", End, "(zoom_level) from tiles"]))))))).
 
 zmin(D) -> z(D, min).
-zmax(D) -> z(D, max).
+zmax(D) -> z(D, max)+1.
 
 x(D, End, Z) ->
 element(1,hd(element(2,hd(tl(sqlite3:sql_exec(D, lists:concat(["SELECT ", End, "(tile_column) from tiles WHERE zoom_level = ", Z]))))))).
 
 xmin(D, Z) -> x(D, min, Z).
 
-xmax(D, Z) -> x(D, max, Z).
+xmax(D, Z) -> x(D, max, Z)+1.
 
 y(D, End, Z, X) ->
 element(1,hd(element(2,hd(tl(sqlite3:sql_exec(D, lists:concat(["SELECT ", End, "(tile_row) from tiles WHERE zoom_level = ", Z, " AND tile_column = ", X]))))))).
 
 ymin(D, Z, X) -> y(D, min, Z, X).
 
-ymax(D, Z, X) -> y(D, max, Z, X).
+ymax(D, Z, X) -> y(D, max, Z, X)+1.
 
 newCdb(M,S) ->
 couchbeam:create_db(S, atom_to_list(M)).
 
-deleteCdb(M) -> httpc:request(delete, {lists:concat([getHost(),"/",M]),[]},[],[]).
+getTilePath(M) ->
+filename:join([filename:absname(""),"tiles",lists:concat([M, ".mbtiles"])]).
 
+checkMBTILES(M) ->
+filelib:is_file(getTilePath(M)).
 
-iTile(D,T,Z,X,Y) ->
-ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"t"]),kublai:fetchTile(D,Z,X,Y)}).
-
-iGrid(D,T,Z,X,Y) ->
-ets:insert(T,{lists:concat(["z",Z,"x",X,"y",Y,"g"]),list_to_binary(kublai:fetchGrids(D,Z,X,Y))}).
-
-dumpGrid(M) ->
-D = kublai:openMBTILES(M),
-T = ets:new(M,[]),
-try lists:usort(lists:flatten(lists:map(fun(Q) -> dumpGrid(D,T,Q) end, for(zmin(D),zmax(D))))) of
-[true] -> uploadGrid(T,M)
-after
-sqlite3:close(D)
+openMBTILES(M) ->
+case checkMBTILES(M) of
+true -> element(2,sqlite3:start_link(m,[{file, getTilePath(M)}]));
+false -> throw(noSuchTileset)
 end.
 
-dumpGrid(D,T,Z) ->
-lists:map(fun(Q) -> dumpGrid(D,T,Z,Q) end, for(xmin(D,Z),xmax(D,Z))).
-
-dumpGrid(D,T,Z,X) ->
-lists:map(fun(Q) -> iGrid(D,T,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))).
-
-dump(M) ->
-D = kublai:openMBTILES(M),
-T = ets:new(M,[]),
-try lists:usort(lists:flatten(lists:map(fun(Q) -> dump(D,T,Q) end, for(zmin(D),zmax(D))))) of
-[true] -> upload(T,M)
-after
-sqlite3:close(D)
-end.
-
-dump(D,T,Z) ->
-lists:map(fun(Q) -> dump(D,T,Z,Q) end, for(xmin(D,Z),xmax(D,Z))).
-
-dump(D,T,Z,X) ->
-lists:map(fun(Q) -> iTile(D,T,Z,X,Q) end, for(ymin(D,Z,X),ymax(D,Z,X))).
-
-getHost() ->
-{ok, S} = file:open("config.dat", read),
-H = element(2,io:read(S,'')),
-file:close(S),
-H.
-
-upload(T,M) ->
-couchbeam:start(),
-S = couchbeam:server_connection(),
-couchbeam:create_db(S, atom_to_list(M)),
-{ok,Dd} = couchbeam:open_db(S, atom_to_list(M)),
-try lists:foreach(fun({A,B}) -> couchbeam:put_attachment(Dd,A,"tile.png",B,[{content_type, "image/png"}]) end, ets:tab2list(T))
-after
-couchbeam:stop()
-end.
-
-uploadGrid(T,M) ->
-couchbeam:start(),
-S = couchbeam:server_connection(),
-couchbeam:create_db(S, atom_to_list(M)),
-{ok,Dd} = couchbeam:open_db(S, atom_to_list(M)),
-try lists:foreach(fun({A,B}) -> couchbeam:put_attachment(Dd,A,"grid",B,[{content_type, "application/javascript"}]) end, ets:tab2list(T))
-after
-couchbeam:stop()
-end.
-
-
-nDump(M,tiles) ->
-D = kublai:openMBTILES(M),
-try sqlite3:read_all(D,tiles) of
-[{columns,["zoom_level","tile_column","tile_row","tile_data"]},{rows,L}] -> L
-after
-sqlite3:close(D)
-end;
-nDump(M,grids) ->
-D = kublai:openMBTILES(M),
-try sqlite3:read_all(D,grids) of
-[{columns,["zoom_level","tile_column","tile_row","grid"]},{rows,Grid}] -> Grid
-after
-sqlite3:close(D)
-end;
-nDump(M,key) ->
-D = kublai:openMBTILES(M),
-try sqlite3:read_all(D,grid_data) of
-[{columns,["zoom_level","tile_column","tile_row","key_name","key_json"]},{rows,Key}] -> Key
-after
-sqlite3:close(D)
-end.
-
-nMap(M,key) ->
-L = nDump(M,key),
-lists:map(fun({A,B,C,D,E}) -> {{A,B,C},{D,E}} end, L);
-nMap(M,V) ->
-L = nDump(M,V),
-lists:map(fun({A,B,C,{blob,D}}) -> {{A,B,C},D} end, L).
-
-nUpload(M,tiles) ->
-L = nMap(M,tiles),
-couchbeam:start(),
-S = couchbeam:server_connection(),
-{ok,Dd} = couchbeam:open_or_create_db(S, atom_to_list(M)),
-try lists:usort(lists:map(fun({{Z,X,Y},B}) -> element(1,couchbeam:put_attachment(Dd,lists:concat(["z",Z,"x",X,"y",Y,"t"]),"tile",B,[{content_type, "image/png"}])) end,L)) of
-[ok] -> couchbeam:stop()
-catch
-throw:X -> X
-end;
-nUpload(M,grids) ->
-L = nMap(M,grids),
-couchbeam:start(),
-S = couchbeam:server_connection(),
-{ok,Dd} = couchbeam:open_or_create_db(S, atom_to_list(M)),
-try lists:usort(lists:map(fun({{Z,X,Y},B}) -> element(1,couchbeam:put_attachment(Dd,lists:concat(["z",Z,"x",X,"y",Y,"g"]),"grid",B,[{content_type, "text/javascript"}])) end,L)) 
-catch
-throw:X -> X;
-exit:X -> X;
-error:X -> X
+fetchTile(D,Z,X,Y) ->
+case sqlite3:sql_exec(D, lists:concat(["SELECT tile_data FROM tiles WHERE zoom_level = ", Z, " AND tile_column = ", X, " AND tile_row = ", Y])) of
+[{columns,["tile_data"]},{rows,[{{blob,Tile}}]}] -> Tile;
+[{columns,["tile_data"]},{rows,[]}] -> throw(noSuchTile);
+true -> throw(noSuchTile)
 end.
