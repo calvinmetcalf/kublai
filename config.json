@@ -1,0 +1,11 @@
+{
+   "favicon" : "/kublai.ico",
+   "layers" : {
+       "mpo":{
+           "type" : "mbtiles",
+           "file": "./tiles/mpo.mbtiles",
+           "preview": true
+       }       
+   }
+    
+}

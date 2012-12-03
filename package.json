@@ -24,6 +24,7 @@
   "dependencies": {
       "express":"3.x"
       ,"coffee-script":"1.x"
+      ,"sqlite3":">=0.0.1"
   },
   "devDependencies": {},
   "bundleDependencies": [],
