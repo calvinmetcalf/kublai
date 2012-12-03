@@ -4,3 +4,4 @@ node_modules
 *.beam
 modules
 .erlang
+.c9revisions
