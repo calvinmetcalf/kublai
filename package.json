@@ -25,8 +25,8 @@
       "express":"3.x"
       ,"coffee-script":"1.x"
       ,"sqlite3":">=0.0.1"
-      ,"blend":"git://github.com/calvinmetcalf/node-blend.git"
-      ,"request":">=0.0.1"
+     ,"tilelive":">=0.0.1"
+      ,"mbtiles":">=0.0.1"
   },
   "devDependencies": {},
   "bundleDependencies": [],

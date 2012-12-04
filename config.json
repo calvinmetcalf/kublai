@@ -3,9 +3,18 @@
    "layers" : {
        "mpo":{
            "type" : "mbtiles",
-           "file": "./tiles/mpo.mbtiles",
-           "preview": true
-       }       
+           "options":{
+               "file": "./tiles/mpo.mbtiles"
+           },
+           "preview" : true
+       },
+       "osm":{
+           "type" : "proxy",
+           "options":{
+           "url" : "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
+           },
+           "preview" : true
+       }
    }
     
 }

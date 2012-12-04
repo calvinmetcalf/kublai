@@ -1,5 +1,5 @@
 exports.run=(app)->
-    ipaddr = process.env.OPENSHIFT_INTERNAL_IP or '0.0.0.0'
+    ipaddr = process.env.OPENSHIFT_INTERNAL_IP or process.env.IP or '0.0.0.0'
     port = process.env.OPENSHIFT_INTERNAL_PORT or process.env.PORT or 7027 
     console.warn "No OPENSHIFT_INTERNAL_IP environment variable"  if typeof ipaddr is "undefined"
     terminator = (sig) ->
