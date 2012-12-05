@@ -3,6 +3,7 @@ tilelive = require 'tilelive'
 mbtiles.registerProtocols tilelive
 config = require './config.json'
 proxy = require './proxy'
+blend = require './blend'
 
 Tiles = (loc)->
 	tilelive.list "./tiles", (e,list)=>
@@ -50,6 +51,9 @@ Tiles::getTile = (opts, res)->
 						switch opts.format
 							when "png" then res.set 'Content-Type', "image/png"
 						res.send tile
+			when "blend"
+				blendLayer = blend.open layer.options, @, opts
+				blendLayer.getTile z,x,y,res
 				
 Tiles::getTileJson = (opts, res) ->
 	if opts.layer of @layers
