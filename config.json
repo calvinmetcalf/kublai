@@ -1,20 +1,3 @@
 {
-   "favicon" : "/kublai.ico",
-   "layers" : {
-       "mpo":{
-           "type" : "mbtiles",
-           "options":{
-               "file": "./tiles/mpo.mbtiles"
-           },
-           "preview" : true
-       },
-       "osm":{
-           "type" : "proxy",
-           "options":{
-           "url" : "http://tile.openstreetmap.org/{z}/{x}/{y}.png"
-           },
-           "preview" : true
-       }
-   }
-    
+   "favicon" : "/kublai.ico"    
 }

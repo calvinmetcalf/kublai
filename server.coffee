@@ -1,6 +1,6 @@
 express = require 'express'
 config = require './config.json'
-routes = require('./tile').open("./tiles")
+routes = require('./routes').open("./tiles")
 fs = require 'fs'
 preview = fs.readFileSync './preview.html', 'utf8'
 kublai = express()

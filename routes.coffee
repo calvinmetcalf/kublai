@@ -1,38 +1,46 @@
-config = require './config.json'
-sources = require './sources.json'
-cache = require('./cache').open("nstoreCach.db")
-fs = require 'fs'
-blank = fs.readFileSync './blank.png'
+mbtiles = require 'mbtiles'
+tilelive = require 'tilelive'
+mbtiles.registerProtocols tilelive
 
-layers = {}
+Tiles = (loc)->
+	tilelive.list "./tiles", (e,list)=>
+		unless e
+			keys = Object.keys list
+			sources = {}
+			keys.forEach (key)->
+				tilelive.load list[key], (err, tileSource)->
+					sources[key] = tileSource unless err
+			@layers = sources
+	@
 
-for key of config.layers
-	layerType = config.layers[key].type
-	layers[key] = require(sources[layerType]).open(config.layers[key].options)
-
-respond = (tile, opt, res, c)->
-	switch opt.format
-		when "png" then res.set 'Content-Type', "image/png"
-	cache.set opt, tile if c
-	res.send tile
-
-exports.getTile = (opt, res)->
-	cb = (err, tile)->
-		if err
-			console.log "not cached"
-			fetchTile opt, res
-		else if tile
-			console.log "fetched"
-			respond tile, opt, res
-	cache.get opt, cb
-
-fetchTile = (opt,res)->
-	layer = config.layers[opt.layer]
-	console.log "getting tile"
-	cb = (err, tile)->
-		if err
-			respond blank, opt, res, true
-		else if tile
-			console.log "got tile"
-			respond tile, opt, res, true
-	layers[opt.layer].get opt, cb
+exports.open = (loc)->
+	new Tiles loc
+	
+Tiles::getTile = (opts, res)->
+	if opts.layer of @layers
+		layer = @layers[opts.layer]
+		y = parseInt opts.y
+		z = parseInt opts.zoom
+		x = parseInt opts.x
+		#y = (1 << z) - 1 - y
+		if opts.format == "grid.json"
+			layer.getGrid z,x,y,(err, grid)->
+				res.jsonp grid
+				
+		else
+			layer.getTile z,x,y,(err, tile)->
+					switch opts.format
+						when "png" then res.set 'Content-Type', "image/png"
+					res.send tile
+				
+Tiles::getTileJson = (opts, res) ->
+	if opts.layer of @layers
+		layer = @layers[opts.layer]
+		layer.getInfo (err,data)->
+			data.scheme = "xyz"
+			data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
+			data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
+			data.version = "1.0.0"
+			switch opts.format
+				when "jsonp" then res.jsonp data
+				when "json" then res.json data
