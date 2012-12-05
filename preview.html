@@ -12,6 +12,8 @@
             <link rel="stylesheet" href="/leaflet/leaflet.ie.css" />
         <![endif]-->
         <script src="/leaflet/leaflet.js"></script>
+        <script src="/leaflet/tilejson.js"></script>
+        <script src="/leaflet/leaflet.utfgrid.js"><</script>
         <style>
             html { 
                 height: 100% 
@@ -29,14 +31,36 @@
     <body>
         <div id="map"></div>
         <script>
-var m = L.map('map');
+        
+        var init = function(tilejson){
+var popup = L.popup();
+var m = L.TileJSON.createMap('map', tilejson);
 
-m.setView([42.2, -71], 8);
-var url = '{z}/{x}/{y}.png';
+var utfGrid = new L.UtfGrid(tilejson.grids+"?callback={cb}",{resolution:4});
+m.addLayer(utfGrid);
+utfGrid.on('click', function (e) {
 
-var mq=L.tileLayer(url);
+    		if (e.data) {
+    
+            var content = [];
+            for(key in e.data){
+                content.push(key + ": " + e.data[key]);
+            }
+            popup.setLatLng(e.latlng).setContent(content.join("<br />")).openOn(m);
+          
+			} 
+		}); var mapDiv = L.DomUtil.get("map");
+var oldStyle = mapDiv.getAttribute("style");
+utfGrid.on('mouseover', function (e) {
 
-mq.addTo(m);
+    mapDiv.setAttribute("style", oldStyle + " cursor: pointer;")
+});
+utfGrid.on('mouseout', function (e) {
+ 
+    mapDiv.setAttribute("style", oldStyle)
+});
+};
         </script>
+        <script src="tile.jsonp?callback=init"></script>
     </body>
 </html>

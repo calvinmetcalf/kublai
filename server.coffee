@@ -12,14 +12,18 @@ kublai.use express.static(__dirname + '/public')
 
 kublai.get '/', (req, res)->
     res.jsonp hello: "there"
-kublai.get '/:layer/:z/:x/:y.(png|jpg|jpeg)', (req, res) ->
+kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
     opts =
         layer: req.params.layer
         zoom: req.params.z
         x: req.params.x
         y: req.params.y
-        format: req.params[0]
+        format: req.params.format
     routes.getTile opts, res
+kublai.get '/:layer.:format', (req, res) ->
+	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, res
+kublai.get '/:layer/tile.:format', (req, res) ->
+	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, res
 kublai.get '/:layer/preview', (req, res)->
     res.send preview
 int = require './internals.coffee'
