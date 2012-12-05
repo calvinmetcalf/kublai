@@ -31,35 +31,32 @@
     <body>
         <div id="map"></div>
         <script>
-        
+        var t;
         var init = function(tilejson){
+        	t=tilejson
 var popup = L.popup();
 var m = L.TileJSON.createMap('map', tilejson);
-
-var utfGrid = new L.UtfGrid(tilejson.grids+"?callback={cb}",{resolution:4});
-m.addLayer(utfGrid);
-utfGrid.on('click', function (e) {
-
-    		if (e.data) {
-    
-            var content = [];
+if("grids" in tilejson){(function(){
+	var utfGrid = new L.UtfGrid(tilejson.grids+"?callback={cb}",{resolution:4});
+	m.addLayer(utfGrid);
+	utfGrid.on('click', function (e) {
+		if (e.data) {
+			var content = [];
             for(key in e.data){
                 content.push(key + ": " + e.data[key]);
             }
             popup.setLatLng(e.latlng).setContent(content.join("<br />")).openOn(m);
-          
-			} 
-		}); var mapDiv = L.DomUtil.get("map");
-var oldStyle = mapDiv.getAttribute("style");
-utfGrid.on('mouseover', function (e) {
-
-    mapDiv.setAttribute("style", oldStyle + " cursor: pointer;")
-});
-utfGrid.on('mouseout', function (e) {
- 
-    mapDiv.setAttribute("style", oldStyle)
-});
-};
+		} 
+	}); var mapDiv = L.DomUtil.get("map");
+	var oldStyle = mapDiv.getAttribute("style");
+	utfGrid.on('mouseover', function (e) {
+    	mapDiv.setAttribute("style", oldStyle + " cursor: pointer;")
+	});
+	utfGrid.on('mouseout', function (e) {
+ 		mapDiv.setAttribute("style", oldStyle)
+	});
+}())};
+}
         </script>
         <script src="tile.jsonp?callback=init"></script>
     </body>

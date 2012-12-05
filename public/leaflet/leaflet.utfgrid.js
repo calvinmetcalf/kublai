@@ -1,3 +1,5 @@
+// from https://github.com/danzel/Leaflet.utfgrid
+
 L.Util.jsonp = function (url, cb, cbParam, callbackName){
     var cbName,ourl,cbSuffix,scriptNode,
        head = document.getElementsByTagName('head')[0];

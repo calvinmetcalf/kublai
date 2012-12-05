@@ -1,3 +1,4 @@
+//from https://github.com/perliedman/leaflet-tilejson
 if (typeof L == "undefined"
     || typeof L.version == "undefined"
     || L.version < '0.4') {
