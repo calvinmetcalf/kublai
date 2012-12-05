@@ -1,11 +1,13 @@
 request = require 'request'
 
-Proxy = (url)->
-	@url = url
+Proxy = (options)->
+	@url = options.tile
+	if "subdomains" of options
+		@subdomains=options.subdomains
 	@
 
-exports.open = (opt)->
-	new Proxy opt.url
+exports.open = (url) ->
+	new Proxy url
 
 template = (str, data) ->
 	str.replace /\{ *([\w_]+) *\}/g, (str, key) ->
@@ -13,11 +15,12 @@ template = (str, data) ->
 		throw new Error("No value provided for variable " + str)	unless data.hasOwnProperty(key)
 		value
 
-Proxy::get = (opt, options, cb) ->
-	url = template options.url, {z:opt.zoom, x:opt.x, y:opt.y}
+Proxy::getTile = (z,x,y, cb) ->
+	opts = {z:z, x:x, y:y}
+	opts.s= @subdomains[Math.floor(Math.random() * @subdomains.length)] if "subdomains" of @
+	url = template @url, opts
 	request url, {encoding:null}, (e,r,b)->
 		if e
 			cb e
 		else
 			cb undefined, b
-	
