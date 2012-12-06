@@ -36,6 +36,18 @@
 			"name": "OSM Roads",
 			"attribution":"MassDOT and Map data &copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
 		}
+   	},
+   	"osm-mpo":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["osm","mpo"]
+   		},
+   		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "OSM mpo",
+			"attribution":"MassDOT and Map data &copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+		}
    	}
    }
 }
