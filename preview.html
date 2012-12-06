@@ -14,6 +14,7 @@
         <script src="/leaflet/leaflet.js"></script>
         <script src="/leaflet/tilejson.js"></script>
         <script src="/leaflet/leaflet.utfgrid.js"><</script>
+        <script src="/leaflet/leaflet.hash.js"><</script>
         <style>
             html { 
                 height: 100% 
@@ -36,6 +37,7 @@
         	t=tilejson
 var popup = L.popup();
 var m = L.TileJSON.createMap('map', tilejson);
+m.addHash();
 if("grids" in tilejson){(function(){
 	var utfGrid = new L.UtfGrid(tilejson.grids+"?callback={cb}",{resolution:4});
 	m.addLayer(utfGrid);
