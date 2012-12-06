@@ -26,6 +26,7 @@ composit = (a,b,cb)->
 			j = i+((4 - ((i+1) % 4)) %4)
 			if (j - i ) == 3
 				top[j] = 0xff - top[j]
+				base[j] = 0xff - base[j]
 			b = base[i]
 			t = top[i]
 			c = (255-top[j]) / 255
