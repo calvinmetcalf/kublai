@@ -20,7 +20,7 @@ exports.open = (loc)->
 	new Tiles loc
 	
 
-Tiles::getTile = (opts, res)->
+Tiles::getTile = (opts, callback)->
 	if opts.layer of @layers
 		layer = @layers[opts.layer]
 		y = parseInt opts.y
@@ -29,13 +29,11 @@ Tiles::getTile = (opts, res)->
 		#y = (1 << z) - 1 - y
 		if opts.format == "grid.json"
 			layer.getGrid z,x,y,(err, grid)->
-				res.jsonp grid
+				callback null, grid
 
 		else
 			layer.getTile z,x,y,(err, tile)->
-					switch opts.format
-						when "png" then res.set 'Content-Type', "image/png"
-					res.send tile
+					callback null, tile
 	else if opts.layer of config.layers
 		layer = config.layers[opts.layer]
 		y = parseInt opts.y
@@ -46,16 +44,18 @@ Tiles::getTile = (opts, res)->
 				proxyLayer = proxy.open layer.options
 				proxyLayer.getTile z,x,y,(err, tile)->
 					if err
-						res.json err
+						callback err
 					else
-						switch opts.format
-							when "png" then res.set 'Content-Type', "image/png"
-						res.send tile
+						callback null, tile
 			when "blend"
 				blendLayer = blend.open layer.options, @, opts
-				blendLayer.getTile z,x,y,res
+				blendLayer.getTile z,x,y,(err, tile)->
+					if err
+						callback err
+					else
+						callback null, tile
 				
-Tiles::getTileJson = (opts, res) ->
+Tiles::getTileJson = (opts, callback) ->
 	if opts.layer of @layers
 		layer = @layers[opts.layer]
 		layer.getInfo (err,data)->
@@ -63,19 +63,13 @@ Tiles::getTileJson = (opts, res) ->
 			data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
 			data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
 			data.version = "1.0.0"
-			switch opts.format
-				when "jsonp" then res.jsonp data
-				when "json" then res.json data
+			callback null, data
 	else if opts.layer of config.layers
 		layer = config.layers[opts.layer]
-		switch layer.type
-			when "proxy"
-				data = layer.info
-				data.scheme = "xyz"
-				data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
-				data.tilejson = "2.0.0"
-				if "grid" of layer.options
-					data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
-				switch opts.format
-					when "jsonp" then res.jsonp data
-					when "json" then res.json data
+		data = layer.info
+		data.scheme = "xyz"
+		data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
+		data.tilejson = "2.0.0"
+		if "grid" of layer.options
+			data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
+		callback null, data

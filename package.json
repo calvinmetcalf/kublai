@@ -26,6 +26,9 @@
       ,"coffee-script":"1.x"
      ,"tilelive":">=0.0.1"
       ,"mbtiles":">=0.0.1"
+      ,"pngparse":">=0.0.1"
+      ,"image":">=0.0.1"
+      ,"async":">=0.0.1"
   },
   "devDependencies": {},
   "bundleDependencies": [],
