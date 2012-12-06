@@ -4,11 +4,6 @@ async = require 'async'
     
 parsePng = (buff, cb)->    
     pngparse.parse buff, (err, data) ->
-        i = 0
-        len = data.data.length
-        while i < len
-            data.data[i] = 0xff - data.data[i] if i%4 == 3
-            i++
         cb null, data.data
  
 composit = (a,b,cb)->
@@ -29,6 +24,8 @@ composit = (a,b,cb)->
 		len = base.length
 		while i < len
 			j = i+((4 - ((i+1) % 4)) %4)
+			if (j - i ) == 3
+				top[j] = 0xff - top[j]
 			b = base[i]
 			t = top[i]
 			c = (255-top[j]) / 255
