@@ -1,4 +1,5 @@
 request = require 'request'
+convert = require './convert'
 
 Proxy = (options)->
 	@url = options.tile
@@ -23,4 +24,9 @@ Proxy::getTile = (z,x,y, cb) ->
 		if e
 			cb e
 		else
-			cb undefined, b
+			#console.log r.headers["content-type"]
+			if r.headers["content-type"] == "image/jpeg"
+				#console.log "converting"
+				convert.toPNG b, cb
+			else
+				cb undefined, b

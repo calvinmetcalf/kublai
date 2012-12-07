@@ -25,7 +25,19 @@
 			"name": "MassDOT Roads"
 		}
    	},
-   	"blendTest":{
+   	"mqroads":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["mq","Roads"]
+   		},
+   		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "OSM Roads",
+			"attribution":"Roads from MassDOT and Base Tiles courtesy of <a href='http://www.mapquest.com/' target='_blank'>MapQuest</a> <img src='http://developer.mapquest.com/content/osm/mq_logo.png'>"
+		}
+   	},
+   	"osmroads":{
    		"type":"blend",
    		"options":{
    			"layers":["osm","Roads"]
@@ -37,7 +49,7 @@
 			"attribution":"MassDOT and Map data &copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
 		}
    	},
-   	"osm-mpo":{
+   	"osmmpo":{
    		"type":"blend",
    		"options":{
    			"layers":["osm","mpo"]
@@ -47,6 +59,42 @@
 			"version" : "1.0.0",
 			"name": "OSM mpo",
 			"attribution":"MassDOT and Map data &copy; <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+		}
+   	},"mq":{
+		"type": "proxy",
+		"options":{
+			"tile" : "http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png",
+			"subdomains":"1234"
+		},
+		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "Map Quest Open",
+			"attribution":"Tiles courtesy of <a href='http://www.mapquest.com/' target='_blank'>MapQuest</a> <img src='http://developer.mapquest.com/content/osm/mq_logo.png'>"
+		}
+   	},"stamenTerrain":{
+		"type": "proxy",
+		"options":{
+			"tile" : "http://{s}.tile.stamen.com/terrain-background/{z}/{x}/{y}.jpg",
+			"subdomains":"abc"
+		},
+		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "stamenTerrain",
+			"attribution":"Map tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
+		}
+   	},
+   	"stamenRoads":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["stamenTerrain","Roads"]
+   		},
+   		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "Terrain Roads",
+			"attribution":"Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
    	}
    }

@@ -51,8 +51,10 @@ Tiles::getTile = (opts, callback)->
 				blendLayer = blend.open layer.options, @, opts
 				blendLayer.getTile z,x,y,(err, tile)->
 					if err
+						#console.log "err"
 						callback err
 					else
+						#console.log "no err"
 						callback null, tile
 				
 Tiles::getTileJson = (opts, callback) ->

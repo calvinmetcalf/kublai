@@ -29,9 +29,12 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 		if err
 			res.json err
 		else
-			if opts.format == "png"
+			if opts.format == "grid.json"
+				res.jsonp tile
+			else
 				res.set 'Content-Type', "image/png"
-			res.send tile
+				res.send tile
+				return #console.log "fin!"
 kublai.get '/:layer.:format', (req, res) ->
 	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, (err, tileJson)->
 		switch req.params.format

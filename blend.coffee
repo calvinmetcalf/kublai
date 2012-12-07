@@ -1,10 +1,17 @@
 Image = require 'image'
 pngparse = require 'pngparse'
 async = require 'async'
+im = require 'imagemagick'    
     
 parsePng = (buff, cb)->    
-    pngparse.parse buff, (err, data) ->
-        cb null, data.data
+	im.readMetadata buff.toString(), (e,m)->
+		console.log m
+	pngparse.parse buff, (err, data) ->
+		if err
+			cb err
+			console.log err
+		else
+			cb null, data.data
  
 composit = (a,b,cb)->
 	if a and not b
@@ -17,6 +24,12 @@ composit = (a,b,cb)->
 		cb(true)
 		return
 	async.map [a,b], parsePng, (err, tiles)->
+		if tiles.length == 0
+			cb true
+			return
+		else if tiles.length == 1
+			cb null, a
+			return
 		base = tiles[0]
 		top = tiles[1]
 		console.log "starting compositing"
