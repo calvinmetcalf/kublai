@@ -29,6 +29,7 @@
       ,"pngparse":">=0.0.1"
       ,"image":">=0.0.1"
       ,"async":">=0.0.1"
+      ,"imagemagick":">=0.0.1"
   },
   "devDependencies": {},
   "bundleDependencies": [],
