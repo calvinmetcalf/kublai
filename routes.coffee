@@ -2,8 +2,8 @@ mbtiles = require 'mbtiles'
 tilelive = require 'tilelive'
 mbtiles.registerProtocols tilelive
 config = require './config.json'
-proxy = require './proxy'
-blend = require './blend'
+proxy = require './providers/proxy'
+blend = require './providers/blend'
 
 Tiles = (loc)->
 	tilelive.list "./tiles", (e,list)=>
@@ -13,6 +13,12 @@ Tiles = (loc)->
 			keys.forEach (key)->
 				tilelive.load list[key], (err, tileSource)->
 					sources[key] = tileSource unless err
+			for key of config.layers
+				switch config.layers[key].type
+					when "proxy"
+						sources[key] = proxy.open config.layers[key].options
+					when "blend"
+						sources[key] = blend.open config.layers[key].options, @
 			@layers = sources
 	@
 
@@ -34,31 +40,18 @@ Tiles::getTile = (opts, callback)->
 		else
 			layer.getTile z,x,y,(err, tile)->
 					callback null, tile
-	else if opts.layer of config.layers
-		layer = config.layers[opts.layer]
-		y = parseInt opts.y
-		z = parseInt opts.zoom
-		x = parseInt opts.x
-		switch layer.type
-			when "proxy"
-				proxyLayer = proxy.open layer.options
-				proxyLayer.getTile z,x,y,(err, tile)->
-					if err
-						callback err
-					else
-						callback null, tile
-			when "blend"
-				blendLayer = blend.open layer.options, @, opts
-				blendLayer.getTile z,x,y,(err, tile)->
-					if err
-						#console.log "err"
-						callback err
-					else
-						#console.log "no err"
-						callback null, tile
 				
 Tiles::getTileJson = (opts, callback) ->
-	if opts.layer of @layers
+	if opts.layer of config.layers
+		layer = config.layers[opts.layer]
+		data = layer.info
+		data.scheme = "xyz"
+		data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
+		data.tilejson = "2.0.0"
+		if "grid" of layer.options
+			data.grids = [opts.protocol+"://"+opts.host+"/"+layer.options.grid+"/{z}/{x}/{y}.grid.json"]
+		callback null, data
+	else
 		layer = @layers[opts.layer]
 		layer.getInfo (err,data)->
 			data.scheme = "xyz"
@@ -66,12 +59,3 @@ Tiles::getTileJson = (opts, callback) ->
 			data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
 			data.version = "1.0.0"
 			callback null, data
-	else if opts.layer of config.layers
-		layer = config.layers[opts.layer]
-		data = layer.info
-		data.scheme = "xyz"
-		data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
-		data.tilejson = "2.0.0"
-		if "grid" of layer.options
-			data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
-		callback null, data
