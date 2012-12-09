@@ -4,6 +4,7 @@ async = require 'async'
 im = require 'imagemagick'    
 
 flibA = (buff)->
+	console.log "flip"
 	i = 3
 	len = buff.length
 	while i<len
@@ -17,8 +18,21 @@ parsePng = (buff, cb)->
 			cb err
 		else
 			cb null, data.data
+reduceFunc = (base, top)->
+	console.log "reduce"
+	i = 0
+	len = base.length
+	while i < len
+		j = i+((4 - ((i+1) % 4)) %4)
+		b = base[i]
+		t = top[i]
+		c = top[j] / 255
+		base[i]= b + c * (t - b)
+		i++
+ 	new Image('png', "rgba").encodeSync(flibA(base), 256, 256)
  
 composit = (buffs,cb)->
+	console.log "composit"
 	if buffs.length == 1
 		cb null, buffs[0]
 		return
@@ -29,21 +43,7 @@ composit = (buffs,cb)->
 		if tiles.length == 0
 			cb true
 			return
-		else if tiles.length == 1
-			cb null, a
-			return
-		base = tiles[0]
-		top = tiles[1]
-		i = 0
-		len = base.length
-		while i < len
-			j = i+((4 - ((i+1) % 4)) %4)
-			b = base[i]
-			t = top[i]
-			c = top[j] / 255
-			base[i]= b + c * (t - b)
-			i++
-		cb null, new Image('png', "rgba").encodeSync(flibA(base), 256, 256)
+		cb null, tiles.reduce(reduceFunc)
 
 cbo = 
 	set:()->undefined
