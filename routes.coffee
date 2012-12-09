@@ -39,7 +39,10 @@ Tiles::getTile = (opts, callback)->
 
 		else
 			layer.getTile z,x,y,(err, tile)->
+				unless err
 					callback null, tile
+				else
+					callback true
 				
 Tiles::getTileJson = (opts, callback) ->
 	if opts.layer of config.layers
