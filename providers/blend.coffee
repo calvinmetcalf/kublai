@@ -2,7 +2,8 @@ Image = require 'image'
 pngparse = require 'pngparse'
 async = require 'async'
 im = require 'imagemagick'    
-    
+
+
 parsePng = (buff, cb)->    
 	pngparse.parse buff, (err, data) ->
 		if err
@@ -10,17 +11,14 @@ parsePng = (buff, cb)->
 		else
 			cb null, data.data
  
-composit = (a,b,cb)->
-	if a and not b
-		cb null, a
+composit = (buffs,cb)->
+	if buffs.length == 1
+		cb null, buffs[0]
 		return
-	else if not a and b
-		cb null, b
-		return
-	else if not a and not b
+	else if buffs.length == 0
 		cb(true)
 		return
-	async.map [a,b], parsePng, (err, tiles)->
+	async.map buffs, parsePng, (err, tiles)->
 		if tiles.length == 0
 			cb true
 			return
@@ -49,8 +47,7 @@ cbo =
 	jsonp:()->undefined
 	
 Blender = (opt, routes)->
-	@base = opt.layers[0]
-	@overlay = opt.layers[1]
+	@layers = opt.layers
 	@routes = routes
 	@
 
@@ -59,14 +56,17 @@ exports.open = (opt, routes) ->
 	
 Blender::getTile = (z,x,y, cb) ->
 	#console.log "getting"
-	opts={layer : @base}
+	opts={}
 	opts.zoom = z
 	opts.y = y
 	opts.x = x
 	opts.format = "png"
-	@routes.getTile opts, (err, base)=>
-		#console.log "getting base"
-		opts.layer = @overlay
-		@routes.getTile opts, (err, overlay)=>
-			composit base, overlay, cb
+	mapFunc = (l, clb)=>
+		opts.layer = l
+		@routes.getTile opts, clb
+	filterFunc = (a,c)->
+		c !!a
+	async.map @layers, mapFunc, (err, tilesRaw)->
+		async.filter tilesRaw, filterFunc, (tiles)->
+			composit tiles, cb
 		
