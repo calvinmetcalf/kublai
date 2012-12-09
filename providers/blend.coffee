@@ -3,6 +3,13 @@ pngparse = require 'pngparse'
 async = require 'async'
 im = require 'imagemagick'    
 
+flibA = (buff)->
+	i = 3
+	len = buff.length
+	while i<len
+		buff[i] = 0xff - buff[i]
+		i = i + 4
+	buff
 
 parsePng = (buff, cb)->    
 	pngparse.parse buff, (err, data) ->
@@ -31,15 +38,12 @@ composit = (buffs,cb)->
 		len = base.length
 		while i < len
 			j = i+((4 - ((i+1) % 4)) %4)
-			if (j - i ) == 3
-				top[j] = 0xff - top[j]
-				base[j] = 0xff - base[j]
 			b = base[i]
 			t = top[i]
-			c = (255-top[j]) / 255
+			c = top[j] / 255
 			base[i]= b + c * (t - b)
 			i++
-		cb null, new Image('png', "rgba").encodeSync(base, 256, 256)
+		cb null, new Image('png', "rgba").encodeSync(flibA(base), 256, 256)
 
 cbo = 
 	set:()->undefined
