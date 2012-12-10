@@ -25,9 +25,10 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 		x: req.params.x
 		y: req.params.y
 		format: req.params.format
+	console.log req.get "Host"
 	routes.getTile opts, (err, tile)->
 		if err
-			res.json err
+			res.json 404, err
 		else
 			if opts.format == "grid.json"
 				res.jsonp tile

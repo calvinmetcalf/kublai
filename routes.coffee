@@ -1,25 +1,25 @@
-mbtiles = require 'mbtiles'
+#mbtiles = require 'mbtiles'
 tilelive = require 'tilelive'
-mbtiles.registerProtocols tilelive
+#mbtiles.registerProtocols tilelive
 config = require './config.json'
 proxy = require './providers/proxy'
 blend = require './providers/blend'
 
 Tiles = (loc)->
+	sources = {}
 	tilelive.list "./tiles", (e,list)=>
 		unless e
 			keys = Object.keys list
-			sources = {}
 			keys.forEach (key)->
 				tilelive.load list[key], (err, tileSource)->
 					sources[key] = tileSource unless err
-			for key of config.layers
-				switch config.layers[key].type
-					when "proxy"
-						sources[key] = proxy.open config.layers[key].options
-					when "blend"
-						sources[key] = blend.open config.layers[key].options, @
-			@layers = sources
+		for key of config.layers
+			switch config.layers[key].type
+				when "proxy"
+					sources[key] = proxy.open config.layers[key].options
+				when "blend"
+					sources[key] = blend.open config.layers[key].options, @
+		@layers = sources
 	@
 
 exports.open = (loc)->
@@ -35,14 +35,15 @@ Tiles::getTile = (opts, callback)->
 		#y = (1 << z) - 1 - y
 		if opts.format == "grid.json"
 			layer.getGrid z,x,y,(err, grid)->
-				callback null, grid
+				callback(err) if err
+				callback(null, grid) unless err
 
 		else
 			layer.getTile z,x,y,(err, tile)->
 				unless err
 					callback null, tile
-				else
-					callback true
+				if err
+					callback err
 				
 Tiles::getTileJson = (opts, callback) ->
 	if opts.layer of config.layers
