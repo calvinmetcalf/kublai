@@ -5,3 +5,6 @@ node_modules
 modules
 .erlang
 .c9revisions
+attach-store
+by-sequence
+document-store
