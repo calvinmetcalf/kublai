@@ -33,6 +33,7 @@ exports.cache = (url)->
 Cache::get = (params..., cb)->
 	if params.length == 4
 		[layer, z, x, y] = params
+		console.log "4 params"
 	else
 		cb "wrong number of args"
 		return
@@ -42,7 +43,7 @@ Cache::get = (params..., cb)->
 			cb "nope"
 			return
 		else
-			cb null, b
+			cb null, b, {"etag":r.headers.etag,'content-type':r.headers['content-type'],'content-length':r.headers['content-length']}
 			request @url + key, (e2,r2,b2)=>
 				if b2.id == key
 					b2.accessed = (new Date()).getTime()
