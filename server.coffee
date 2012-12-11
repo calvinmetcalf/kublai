@@ -1,6 +1,6 @@
 express = require 'express'
 config = require './config.json'
-routes = require('./routes').open("./tiles")
+routes = require('./routes').open("./tiles", config)
 fs = require 'fs'
 crypto = require 'crypto'
 cache = require("./cache").open(config)

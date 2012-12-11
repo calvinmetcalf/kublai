@@ -1,11 +1,12 @@
 #mbtiles = require 'mbtiles'
 tilelive = require 'tilelive'
 #mbtiles.registerProtocols tilelive
-config = require './config.json'
+config = ""
 providers = require "./providers"
-providers.open config
 
-Tiles = (loc)->
+Tiles = (loc, c)->
+	config = c
+	providers.open config
 	sources = {}
 	tilelive.list "./tiles", (e,list)=>
 		unless e
@@ -18,8 +19,8 @@ Tiles = (loc)->
 		@layers = sources
 	@
 
-exports.open = (loc)->
-	new Tiles loc
+exports.open = (loc,c)->
+	new Tiles loc,c
 	
 
 Tiles::getTile = (opts, callback)->
