@@ -3,9 +3,7 @@ config = require './config.json'
 routes = require('./routes').open("./tiles")
 fs = require 'fs'
 crypto = require 'crypto'
-if config.cache and config.cache.type == "couch"
-	couch = require './providers/couch'
-	cache = couch.cache config.cache.db
+cache = require("./cache").open(config)
 preview = fs.readFileSync './preview.html', 'utf8'
 kublai = express()
 kublai.use express.compress()

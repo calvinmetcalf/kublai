@@ -1,5 +1,5 @@
 request = require 'request'
-convert = require './convert'
+im = require 'imagemagick'
 
 Proxy = (options)->
 	@url = options.tile
@@ -15,7 +15,22 @@ template = (str, data) ->
 		value = data[key]
 		throw new Error("No value provided for variable " + str)	unless data.hasOwnProperty(key)
 		value
-
+		
+toPNG = (jpg,cb)->
+	#console.log "to png"
+	opts =
+		srcData : jpg
+		format : "png"
+		srcFormat : "jpg"
+		width : 256
+	im.resize opts,(err, stdout)->
+		if err
+			#console.log "oh shit"
+			cb err
+		else
+			#console.log "all good"
+			cb null, new Buffer stdout, "binary"
+			
 Proxy::getTile = (z,x,y, cb) ->
 	opts = {z:z, x:x, y:y}
 	opts.s= @subdomains[Math.floor(Math.random() * @subdomains.length)] if "subdomains" of @
@@ -29,6 +44,6 @@ Proxy::getTile = (z,x,y, cb) ->
 			#console.log r.headers["content-type"]
 			if r.headers["content-type"] == "image/jpeg"
 				#console.log "converting"
-				convert.toPNG b, cb
+				toPNG b, cb
 			else
 				cb undefined, b

@@ -2,8 +2,8 @@
 tilelive = require 'tilelive'
 #mbtiles.registerProtocols tilelive
 config = require './config.json'
-proxy = require './providers/proxy'
-blend = require './providers/blend'
+providers = require "./providers"
+providers.open config
 
 Tiles = (loc)->
 	sources = {}
@@ -14,11 +14,7 @@ Tiles = (loc)->
 				tilelive.load list[key], (err, tileSource)->
 					sources[key] = tileSource unless err
 		for key of config.layers
-			switch config.layers[key].type
-				when "proxy"
-					sources[key] = proxy.open config.layers[key].options
-				when "blend"
-					sources[key] = blend.open config.layers[key].options, @
+			sources[key] = providers[config.layers[key].type].open config.layers[key].options, @
 		@layers = sources
 	@
 
