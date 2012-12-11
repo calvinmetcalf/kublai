@@ -2,6 +2,7 @@ express = require 'express'
 config = require './config.json'
 routes = require('./routes').open("./tiles")
 fs = require 'fs'
+crypto = require 'crypto'
 if config.cache and config.cache.type == "couch"
 	couch = require './providers/couch'
 	cache = couch.cache config.cache.db
@@ -40,7 +41,10 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 					if opts.format == "grid.json"
 						res.jsonp tile
 					else
-						res.set 'Content-Type', "image/png"
+						md5 = crypto.createHash 'md5'
+						md5.update tile
+						heads ={ 'Content-Type': "image/png",'etag':'"'+md5.digest("base64")+'"'}
+						res.set heads
 						res.send tile
 						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
 		else

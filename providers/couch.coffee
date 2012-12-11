@@ -33,7 +33,6 @@ exports.cache = (url)->
 Cache::get = (params..., cb)->
 	if params.length == 4
 		[layer, z, x, y] = params
-		console.log "4 params"
 	else
 		cb "wrong number of args"
 		return
@@ -65,6 +64,6 @@ Cache::put = (params..., tile)->
 						doc._rev = b2.rev
 						request @url + doc._id, {method : "PUT", json : doc}, (e3,r3,b3)=>
 							unless b3.error == "conflict"
-								console.log "#{key}  in on try two"
+								#console.log "#{key}  in on try two"
 			else
-				console.log "#{key} put in on try one"
+				#console.log "#{key} put in on try one"
