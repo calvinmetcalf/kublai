@@ -64,6 +64,8 @@ Cache::put = (params..., tile)->
 						doc._rev = b2.rev
 						request @url + doc._id, {method : "PUT", json : doc}, (e3,r3,b3)=>
 							unless b3.error == "conflict"
+								true
 								#console.log "#{key}  in on try two"
 			else
 				#console.log "#{key} put in on try one"
+				true
