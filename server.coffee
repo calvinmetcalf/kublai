@@ -2,8 +2,9 @@ express = require 'express'
 config = require './config.json'
 routes = require('./routes').open("./tiles")
 fs = require 'fs'
-pouch = require './providers/pouch'
-cache = pouch.cache "cache.db"
+if config.cache and config.cache.type == "couch"
+	couch = require './providers/couch'
+	cache = couch.cache config.cache.db
 preview = fs.readFileSync './preview.html', 'utf8'
 kublai = express()
 kublai.use express.compress()

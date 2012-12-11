@@ -1,5 +1,9 @@
 {
    "favicon" : "/kublai.ico",
+   "cache" : {
+		"type":"couch",
+		"db":"http://calvin.iriscouch.com/kublai"
+   },
    "layers" : {
    	"osm":{
 		"type": "proxy",

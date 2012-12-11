@@ -30,7 +30,7 @@
       ,"async":">=0.0.1"
       ,"imagemagick":">=0.0.1"
       ,"request":">=0.0.1"
-      ,"pouchdb":">=0.0.1"
+     
   },
   "devDependencies": {},
   "bundleDependencies": [],
