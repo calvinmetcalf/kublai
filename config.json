@@ -6,6 +6,7 @@
 			"db":"http://calvin.iriscouch.com/kublai"
 		}
    },
+   "domains" : ["http://a.tiles.aa.am","http://b.tiles.aa.am","http://c.tiles.aa.am","http://d.tiles.aa.am"],
    "layers" : {
    	"osm":{
 		"type": "proxy",

@@ -22,6 +22,16 @@ Tiles = (loc, c)->
 exports.open = (loc,c)->
 	new Tiles loc,c
 	
+getDomains = (layer, suffix)->
+	domains = config.domains
+	len = domains.length
+	out = []
+	i = 0
+	while i<len
+		out.push "#{domains[i]}/#{layer}/{z}/{x}/{y}.#{suffix}"
+		i++
+	out	
+	
 
 Tiles::getTile = (opts, callback)->
 	if opts.layer of @layers
@@ -43,20 +53,21 @@ Tiles::getTile = (opts, callback)->
 					callback err
 				
 Tiles::getTileJson = (opts, callback) ->
+	console.log "getting tile json"
 	if opts.layer of config.layers
 		layer = config.layers[opts.layer]
 		data = layer.info
 		data.scheme = "xyz"
-		data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
+		data.tiles = getDomains(opts.layer, "png")
 		data.tilejson = "2.0.0"
 		if "grid" of layer.options
-			data.grids = [opts.protocol+"://"+opts.host+"/"+layer.options.grid+"/{z}/{x}/{y}.grid.json"]
+			data.grids = getDomains(layer.options.grid,"grid.json")
 		callback null, data
 	else
 		layer = @layers[opts.layer]
 		layer.getInfo (err,data)->
 			data.scheme = "xyz"
-			data.tiles = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.png"]
-			data.grids = [opts.protocol+"://"+opts.host+"/"+opts.layer+"/{z}/{x}/{y}.grid.json"]
+			data.tiles = getDomains(opts.layer, "png")
+			data.grids = getDomains(opts.layer, "grid.json")
 			data.version = "1.0.0"
 			callback null, data
