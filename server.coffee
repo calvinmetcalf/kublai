@@ -13,11 +13,9 @@ kublai.use express.static(__dirname + '/public')
 
 kublai.get '/', (req, res)->
 	res.jsonp hello: "there"
-#kublai.get '/test/:z/:x/:y.png', (req,res)->
-#    cb = (e,d)->
-#        res.set 'Content-Type', "image/png"
-#        res.send d
-#    getRoad.getRoad req.params.z,req.params.x,req.params.y,cb
+kublai.get '/stats', (req, res)->
+	numCPUs = require('os').cpus().length
+	res.jsonp num : numCPUs
 kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 	#console.log "getting #{ req.path }"
 	opts =
