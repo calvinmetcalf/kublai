@@ -10,7 +10,7 @@ cache is the same except instead of open it has cache and instead of getTile it 
 
 tiles are all passed around as buffers. 
 
-it has no state, requests to different servers are handled in an identicle manner, i.e. all your subdomains could jsut be different servers and it would be fine. Currenlty it uses to cluster module to create a process for each cpu and splits the load
+it has no state, requests to different servers are handled in an identicle manner, i.e. all your subdomains could just be different servers and it would be fine. Currenlty it uses to cluster module to create a process for each cpu (less one for the image processes)  and splits the load
 
 next up will probobly be some sort of quick cache prob not in memory as that is a bit to close to state for me.
 
