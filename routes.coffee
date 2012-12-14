@@ -3,6 +3,7 @@ tilelive = require 'tilelive'
 #mbtiles.registerProtocols tilelive
 config = ""
 providers = require "./providers"
+crypto = require 'crypto'
 
 Tiles = (loc, c)->
 	config = c
