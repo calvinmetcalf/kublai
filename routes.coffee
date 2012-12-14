@@ -48,7 +48,9 @@ Tiles::getTile = (opts, callback)->
 		else
 			layer.getTile z,x,y,(err, tile)->
 				unless err
-					callback null, tile
+					md5 = crypto.createHash 'md5'
+					md5.update tile
+					callback null, tile, { 'Content-Type': "image/png",'etag':'"'+md5.digest("base64")+'"'}
 				if err
 					callback err
 				

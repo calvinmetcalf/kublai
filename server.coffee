@@ -32,17 +32,14 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 		#console.log "checking cache"
 		if e or !Buffer.isBuffer(t)
 			#console.log "not in cache"
-			routes.getTile opts, (err, tile)->
+			routes.getTile opts, (err, tile, head)->
 				if err
 					res.json 404, err
 				else
 					if opts.format == "grid.json"
 						res.jsonp tile
 					else
-						md5 = crypto.createHash 'md5'
-						md5.update tile
-						heads ={ 'Content-Type': "image/png",'etag':'"'+md5.digest("base64")+'"'}
-						res.set heads
+						res.set head
 						res.send tile
 						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
 		else
