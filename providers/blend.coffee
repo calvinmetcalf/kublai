@@ -19,6 +19,7 @@ parsePng = (buff, cb)->
 			cb null, data.data
  
 composit = (buffs,cb)->
+	#console.log buffs.length
 	if buffs.length == 1
 		cb null, buffs[0]
 		return
