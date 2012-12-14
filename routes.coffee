@@ -48,15 +48,18 @@ Tiles::getTile = (opts, callback)->
 
 		else
 			layer.getTile z,x,y,(err, tile)->
-				unless err
+				if err
+					callback err
+				else unless tile
+					callback "#{z}/#{x}/#{y} isn't a tile"
+				else
 					md5 = crypto.createHash 'md5'
 					md5.update tile
 					callback null, tile, { 'Content-Type': "image/png",'etag':'"'+md5.digest("base64")+'"'}
-				if err
-					callback err
+				
 				
 Tiles::getTileJson = (opts, callback) ->
-	console.log "getting tile json"
+#	console.log "getting tile json"
 	if opts.layer of config.layers
 		layer = config.layers[opts.layer]
 		data = layer.info
