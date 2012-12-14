@@ -40,7 +40,6 @@ Tiles::getTile = (opts, callback)->
 		y = parseInt opts.y
 		z = parseInt opts.zoom
 		x = parseInt opts.x
-		#y = (1 << z) - 1 - y
 		if opts.format == "grid.json"
 			layer.getGrid z,x,y,(err, grid)->
 				callback(err) if err
@@ -59,7 +58,6 @@ Tiles::getTile = (opts, callback)->
 				
 				
 Tiles::getTileJson = (opts, callback) ->
-#	console.log "getting tile json"
 	if opts.layer of config.layers
 		layer = config.layers[opts.layer]
 		data = layer.info
