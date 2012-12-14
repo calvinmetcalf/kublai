@@ -123,10 +123,30 @@ L.TileJSON = (function() {
     }
 
     function createTileLayer(context) {
-        var tileUrl = context.tileUrls[0].replace(/\$({[sxyz]})/g, '$1');
+    	var tUrls = context.tileUrls.reduce(reduceTiles,{url:"",domains:[]})
+        var tileUrl = tUrls.url.replace(/(\%)+/,"{s}");
+        context.tileLayer.subdomains=tUrls.domains;
         return new L.TileLayer(tileUrl, context.tileLayer);
     };
+	function reduceTiles(a,b){
+		if(a.url.length === 0){
+			return {domains:[],url:b};
+		}else{
+			if(a.url.length == b.length){
+				var len = a.url.length,out = [], i=0;
+				while(i<len){
+					if(a.url[i]!==b[i]){out.push(i);}
+					i++;
+				}if(a.domains.length === 0){
+					a.domains.push(a.url.substr(out[0],out.length));
 
+					a.url = a.url.slice(0,out[0])+(function(x){var i=0,out=[];while(i<x){out.push("%");i++};return out.join("")}(out.length))+a.url.slice(out[0]+out.length)
+				}
+				a.domains.push(b.substr(out[0],out.length));
+				return a;
+			}
+		}
+	}
     return {
         createMapConfig: function(tileJSON, cfg) {
             return parseTileJSON(tileJSON, {mapConfig: cfg}).map;
