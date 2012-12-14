@@ -55,7 +55,8 @@ Tiles::getTile = (opts, callback)->
 					md5 = crypto.createHash 'md5'
 					md5.update tile
 					callback null, tile, { 'Content-Type': "image/png",'etag':'"'+md5.digest("base64")+'"'}
-				
+	else
+		callback "no such layer"
 				
 Tiles::getTileJson = (opts, callback) ->
 	if opts.layer of config.layers
@@ -67,7 +68,7 @@ Tiles::getTileJson = (opts, callback) ->
 		if "grid" of layer.options
 			data.grids = getDomains(layer.options.grid,"grid.json")
 		callback null, data
-	else
+	else if opts.layer of @layers
 		layer = @layers[opts.layer]
 		layer.getInfo (err,data)->
 			data.scheme = "xyz"
@@ -75,3 +76,5 @@ Tiles::getTileJson = (opts, callback) ->
 			data.grids = getDomains(opts.layer, "grid.json")
 			data.version = "1.0.0"
 			callback null, data
+	else
+		callback "no such layer"
