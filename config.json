@@ -3,10 +3,10 @@
    "cache" : {
 		"type":"couch",
 		"options":{
-			"db":"http://calvin.iriscouch.com/kublai"
+			"db":"https://calvin.iriscouch.com/kublai"
 		}
    },
-   "domains" : ["http://a.tiles.aa.am","http://b.tiles.aa.am","http://c.tiles.aa.am","http://d.tiles.aa.am"],
+   "domains" : ["https://a.tiles.aa.am","https://b.tiles.aa.am","https://c.tiles.aa.am","https://d.tiles.aa.am"],
    "layers" : {
    	"osm":{
 		"type": "proxy",
