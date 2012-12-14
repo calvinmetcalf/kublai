@@ -62,5 +62,7 @@ kublai.get '/:layer/tile.:format', (req, res) ->
 				when "json" then res.json tileJson
 kublai.get '/:layer/preview', (req, res)->
 	res.send preview
+kublai.get '*', (req, res)->
+	res.send 404
 int = require './internals.coffee'
 int.run(kublai)
