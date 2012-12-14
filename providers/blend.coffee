@@ -73,4 +73,5 @@ Blender::getTile = (z,x,y, cb) ->
 		c !!a
 	async.map @layers, mapFunc, (err, tilesRaw)->
 		async.filter tilesRaw, filterFunc, (tiles)->
-			composit tiles, cb
+			composit tiles, cb if tiles.length>1
+			cb null, tiles[0] if tiles.length==1
