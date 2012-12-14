@@ -46,11 +46,17 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 				res.send t
 kublai.get '/:layer.:format', (req, res) ->
 	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, (err, tileJson)->
+		if err
+			res.send 404
+			return
 		switch req.params.format
 				when "jsonp" then res.jsonp tileJson
 				when "json" then res.json tileJson
 kublai.get '/:layer/tile.:format', (req, res) ->
 	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, (err, tileJson)->
+		if err
+			res.send 404
+			return
 		switch req.params.format
 				when "jsonp" then res.jsonp tileJson
 				when "json" then res.json tileJson
