@@ -5,7 +5,7 @@ var numCPUs = require('os').cpus().length;
 
 if (cluster.isMaster) {
   // Fork workers.
-  for (var i = 0; i < numCPUs; i++) {
+  for (var i = 1; i < numCPUs; i++) {
     cluster.fork();
   }
 
