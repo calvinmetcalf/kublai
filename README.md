@@ -17,4 +17,4 @@ next up will probobly be some sort of quick cache prob not in memory as that is 
 Q: should I use this for anything in the wild?  
 A:hellz no at the moment consider this alpha at best
 
-[Test version on openshift](http://tiles.aa.am/stamenRoads/preview), (link at the top is to my cat's blog).
+[Test version on modulus](http://kublai.aa.am/stamenRoads/preview), (link at the top is to my cat's blog). now 2 out of 4 tile domains are over on app frog while the other 2 are on openshift
