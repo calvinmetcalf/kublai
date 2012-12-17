@@ -115,10 +115,10 @@
 			"attribution":"Footprints from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
    	},
-   	"stamenBuildingsRoads":{
+   	"stamenRoadsBuildings":{
    		"type":"blend",
    		"options":{
-   			"layers":["stamenBuildings","Roads"]
+   			"layers":["stamenRoads","FootPrints"]
    		},
    		"info":{
 			"center" : [-71.0785,42.3422, 12],
