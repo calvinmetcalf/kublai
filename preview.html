@@ -32,7 +32,25 @@
     </head>
     <body>
         <div id="map"></div>
-        <script>
+        <script>function reduceTiles(a,b){
+		if(a.url.length === 0){
+			return {domains:[],url:b};
+		}else{
+			if(a.url.length == b.length){
+				var len = a.url.length,out = [], i=0;
+				while(i<len){
+					if(a.url[i]!==b[i]){out.push(i);}
+					i++;
+				}if(a.domains.length === 0){
+					a.domains.push(a.url.substr(out[0],out.length));
+
+					a.url = a.url.slice(0,out[0])+(function(x){var i=0,out=[];while(i<x){out.push("%");i++};return out.join("")}(out.length))+a.url.slice(out[0]+out.length)
+				}
+				a.domains.push(b.substr(out[0],out.length));
+				return a;
+			}
+		}
+	}
         var t;
         var init = function(tilejson){
         	t=tilejson
@@ -40,7 +58,9 @@ var popup = L.popup();
 var m = L.TileJSON.createMap('map', tilejson);
 m.addHash();
 if("grids" in tilejson){(function(){
-	var utfGrid = new L.UtfGrid(tilejson.grids+"?callback={cb}",{resolution:4});
+	var tUrls = tilejson.grids.reduce(reduceTiles,{url:"",domains:[]})
+        var tileUrl = tUrls.url.replace(/(\%)+/,"{s}");
+	var utfGrid = new L.UtfGrid(tileUrl+"?callback={cb}",{resolution:4,subdomains:tUrls.domains});
 	m.addLayer(utfGrid);
 	utfGrid.on('click', function (e) {
 		if (e.data) {

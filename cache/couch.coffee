@@ -52,8 +52,7 @@ Cache::get = (params..., cb)->
 		else
 			cb null, b, {"etag":r.headers.etag,'content-type':r.headers['content-type'],'content-length':r.headers['content-length']}
 			request url + key, (e2,r2,b2)=>
-				if b2.id == key
-					b2.accessed = (new Date()).getTime()
+				b2.accessed = (new Date()).getTime()
 				request url +  key, {json : b2, method : "put"}
 
 Cache::put = (params..., tile)->

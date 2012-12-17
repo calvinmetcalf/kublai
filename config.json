@@ -54,6 +54,18 @@
 			"name": "OSM Roads",
 			"attribution":"Roads from MassDOT and Base Tiles courtesy of <a href='http://www.mapquest.com/' target='_blank'>MapQuest</a> <img src='http://developer.mapquest.com/content/osm/mq_logo.png'>"
 		}
+   	},"mqmpo":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["mq","mpo"],
+   			"grid":"mpo"
+   		},
+   		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "MQ MPOs",
+			"attribution":"MPOs from MassDOT and Base Tiles courtesy of <a href='http://www.mapquest.com/' target='_blank'>MapQuest</a> <img src='http://developer.mapquest.com/content/osm/mq_logo.png'>"
+		}
    	},
    	"osmroads":{
    		"type":"blend",

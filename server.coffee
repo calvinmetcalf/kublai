@@ -16,7 +16,7 @@ kublai.get '/', (req, res)->
 kublai.get '/stats', (req, res)->
 	numCPUs = require('os').cpus().length
 	res.jsonp num : numCPUs
-kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
+kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 	#console.log "getting #{ req.path }"
 	opts =
 		layer: req.params.layer
