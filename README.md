@@ -6,6 +6,8 @@ it works and so far has 2 types of layers, "proxy" which just proxies another ti
 
 example config file is there, if you want to add a new provider it needs to export an open method that takes the options in the config file, and that should return an object that has a getTile method. which accepts 4 arguments, zoom, x, y, and callback, callback returns err, tile, etag. it should be in the providers folder with the same name as the layer you refer to it in config.
 
+mbtiles now work after I went with app fog
+
 cache is the same except instead of open it has cache and instead of getTile it has get and put methods, get takes layer, z, x, y, callback(err,tile,etag), and put takes layer,z,x,y,tile
 
 tiles are all passed around as buffers. 
@@ -17,4 +19,4 @@ next up will probobly be some sort of quick cache prob not in memory as that is 
 Q: should I use this for anything in the wild?  
 A:hellz no at the moment consider this alpha at best
 
-[Test version on app frog](http://kublai.aa.am/stamenRoads/preview), (link at the top is to my cat's blog). just sticking with appfrog to make things easier
+[Test version on app fog](http://kublai.ro.lt/all/preview), (link at the top is to my cat's blog). just sticking with appfrog to make things easier
