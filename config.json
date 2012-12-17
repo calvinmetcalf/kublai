@@ -38,7 +38,7 @@
    			"tile" : "http://services.massdot.state.ma.us/ArcGIS/rest/services/GeneralPurpose/Structures/MapServer/tile/{z}/{y}/{x}"
    		},
 		"info":{
-			"center" : [-71,42.2, 8],
+			"center" : [-71.0785,42.3422, 12],
 			"version" : "1.0.0",
 			"name": "Building Footprints"
 		}
