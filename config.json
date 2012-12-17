@@ -32,7 +32,7 @@
 			"name": "MassDOT Roads"
 		}
    	},
-   	"Foot Prints":{
+   	"FootPrints":{
    		"type": "proxy",
    		"options":{
    			"tile" : "http://services.massdot.state.ma.us/ArcGIS/rest/services/GeneralPurpose/Structures/MapServer/tile/{z}/{y}/{x}"
