@@ -6,7 +6,7 @@
 			"db":["http://kublai.cloudant.com/tiles","https://calvin.iriscouch.com/kublai"]
 		}
    },
-   "domains" : ["http://tiles1.aa.am","http://tiles0.aa.am","http://tiles3.aa.am"],
+   "domains" : ["http://kublai-cwm.rhcloud.com"],
    "layers" : {
    	"osm":{
 		"type": "proxy",
@@ -30,6 +30,17 @@
 			"center" : [-71,42.2, 8],
 			"version" : "1.0.0",
 			"name": "MassDOT Roads"
+		}
+   	},
+   	"Foot Prints":{
+   		"type": "proxy",
+   		"options":{
+   			"tile" : "http://services.massdot.state.ma.us/ArcGIS/rest/services/GeneralPurpose/Structures/MapServer/tile/{z}/{y}/{x}"
+   		},
+		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "Building Footprints"
 		}
    	},
    	"mqroads":{
