@@ -22,8 +22,10 @@ quad = (z,x,y) ->
 
 Cache = (urls)->
 	@urls = urls.map (url)->
-		if url.slice(-1) != "/"
-			url = url + "/"
+		if process.env[url].slice(-1) != "/"
+			url = process.env[url] + "/"
+		else
+			url = process.env[url]
 	@
 
 
@@ -36,6 +38,7 @@ Cache::url = ()->
 
 Cache::get = (params..., cb)->
 	url = @url()
+	console.log "getting from #{url}"
 	if params.length == 4
 		[layer, z, x, y] = params
 	else
@@ -55,6 +58,7 @@ Cache::get = (params..., cb)->
 
 Cache::put = (params..., tile)->
 	url = @url()
+	console.log "putting into #{url}"
 	if params.length == 4
 		[layer, z, x, y] = params
 	else

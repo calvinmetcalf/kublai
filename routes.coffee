@@ -1,6 +1,6 @@
-#mbtiles = require 'mbtiles'
+mbtiles = require 'mbtiles'
 tilelive = require 'tilelive'
-#mbtiles.registerProtocols tilelive
+mbtiles.registerProtocols tilelive
 config = ""
 providers = require "./providers"
 crypto = require 'crypto'

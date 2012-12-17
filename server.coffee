@@ -26,9 +26,9 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 		format: req.params.format
 	#console.log req.get "Host"
 	cache.get opts.layer, opts.zoom, opts.x, opts.y, (e,t,h)->
-		#console.log "checking cache"
+		console.log "checking cache"
 		if e or !Buffer.isBuffer(t)
-			#console.log "not in cache"
+			console.log "not in cache"
 			routes.getTile opts, (err, tile, head)->
 				if err
 					res.json 404, err
@@ -40,7 +40,7 @@ kublai.get '/:layer/:z/:x/:y.:format(png|jpg|jpeg|grid.json)', (req, res) ->
 						res.send tile
 						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
 		else
-			#console.log "in cache"
+			console.log "in cache"
 			if h 
 				res.set h
 				res.send t

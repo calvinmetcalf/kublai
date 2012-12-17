@@ -30,6 +30,7 @@
       ,"async":">=0.0.1"
       ,"imagemagick":">=0.0.1"
       ,"request":">=0.0.1"
+      ,"mbtiles":">=0.0.1"
      
   },
   "devDependencies": {},
