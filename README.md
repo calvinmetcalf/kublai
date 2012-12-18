@@ -19,4 +19,4 @@ next up will probobly be some sort of quick cache prob not in memory as that is 
 Q: should I use this for anything in the wild?  
 A:hellz no at the moment consider this alpha at best
 
-[Test version on app fog](http://kublai.ro.lt/quad/preview), (link at the top is to my cat's blog). just sticking with appfrog to make things easier
+[Test version on app fog](http://kublai.ro.lt/all/preview), (link at the top is to my cat's blog). just sticking with appfrog to make things easier
