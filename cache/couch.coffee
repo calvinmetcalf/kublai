@@ -38,57 +38,53 @@ Cache::url = ()->
 	len = @urls.length
 	@urls[Math.floor(Math.random()*len)]
 
-Cache::get = (params..., cb)->
+Cache::get = (o, cb)->
 	url = @url()
-	console.log "getting from #{url}"
-	if params.length == 5
-		[layer, z, x, y, format] = params
-	else
-		cb "wrong number of args"
-		return
+	#console.log "getting from #{url}"
+	[layer, z, x, y, format] = [o.layer,o.zoom, o.x,o.y,o.format]
 	key = "#{ layer }-#{ quad(z,x,y) }"
 	if format == "grid.json"
 		finalUrl = url + key
-		opts = {json:true}
 	else
-		finalUrl = url + key + "/tile.png"
-		opts = {encoding:null}
-	request finalUrl,opts, (e,r,b)=>
-		if e or r.statusCode == 404
-			cb "nope"
+		finalUrl = url + key + "?attachments=true"
+	request finalUrl,{json:true}, (e,r,b)=>
+		if e 
+			cb e
 			return
-		else if format == "png"
-			cb null, b, {"etag":r.headers.etag,'content-type':r.headers['content-type'],'content-length':r.headers['content-length']}
-			request url + key,{json:true}, (e2,r2,b2)=>
-				b2.accessed = (new Date()).getTime()
-				console.log "updating cache"
-				console.log b2
-				request url +  key, {json : b2, method : "put"}, (e3,r3,b3)->
-					console.log b3
-		else if format == "grid.json"
-			cb null, b
-Cache::put = (params..., tile)->
+		else if r.statusCode == 404
+			cb "no such tile"
+			return
+		else if format == "png" and b._attachments
+			cb null, new Buffer(b._attachments["tile.png"].data, "base64"), {"etag":b._attachments["tile.png"].digest.slice(4),'content-type':b._attachments["tile.png"].content_type}
+			b.accessed = (new Date()).getTime()
+			console.log "updating cache"
+			#console.log b
+			request url +  key, {json : b, method : "put"}
+		else if format == "grid.json" and b.grid
+			cb null, b.grid
+			b.accessed = (new Date()).getTime()
+			#console.log "updating cache"
+			#console.log b
+			request url +  key, {json : b, method : "put"}
+		else
+			cb "really no"
+			#console.log "format: " + format + "and attachment: " + JSON.stringify b._attachments
+Cache::put = (o, tile)->
 	url = @url()
-	console.log "putting into #{url}"
-	if params.length == 4
-		[layer, z, x, y] = params
-	else
-		console.log "wrong number of args"
-		return
+	#console.log "putting into #{url}"
+	[layer, z, x, y,] = [o.layer,o.zoom, o.x,o.y]
 	key = "#{ layer }-#{ quad(z,x,y) }"
 	if Buffer.isBuffer tile
 		doc = {_id : key, created : (new Date()).getTime(), accessed :(new Date()).getTime(), _attachments:{"tile.png":{"content_type":"image\/png", data : tile.toString("base64")}}}
 		request url + doc._id, {method : "PUT", json : doc}, (e1,r1,b1)=>
 			if b1.error == "conflict"
 				request url + doc._id,{json:true}, (e2,r2,b2)=>
-						b2.attachments = doc._attachments
-						request url + doc._id, {method : "PUT", json : b2},(e3,r3,b3)->
-							console.log b3
+						b2._attachments = doc._attachments
+						request url + doc._id, {method : "PUT", json : b2}
 	else
 		doc = {_id : key, created : (new Date()).getTime(), accessed :(new Date()).getTime(), grid : tile}
 		request url + doc._id, {method : "PUT", json : doc}, (e1,r1,b1)=>
 			if b1.error == "conflict"
 				request url + doc._id,{json:true}, (e2,r2,b2)=>
 						b2.grid = doc.grid
-						request url + doc._id, {method : "PUT", json : b2},(e3,r3,b3)->
-							console.log b3
+						request url + doc._id, {method : "PUT", json : b2}

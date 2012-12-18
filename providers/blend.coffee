@@ -46,10 +46,6 @@ composit = (buffs,cb)->
 			i++
 		cb null, new Image('png', "rgba").encodeSync(flibA(base), 256, 256)
 
-cbo = 
-	set:()->undefined
-	json:()->@send(undefined)
-	jsonp:()->undefined
 	
 Blender = (opt, routes)->
 	@layers = opt.layers

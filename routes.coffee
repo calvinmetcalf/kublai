@@ -49,6 +49,7 @@ Tiles::getTile = (opts, callback)->
 			layer.getTile z,x,y,(err, tile)->
 				if err
 					callback err
+					return
 				else unless tile
 					callback "#{z}/#{x}/#{y} isn't a tile"
 				else

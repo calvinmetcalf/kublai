@@ -8,7 +8,7 @@ kublai = express()
 kublai.use express.compress()
 kublai.use express.favicon(__dirname + config.favicon)
 kublai.use express.bodyParser()
-#kublai.use express.logger('dev') 
+kublai.use express.logger('dev') 
 kublai.use express.static(__dirname + '/public')
 
 kublai.get '/', (req, res)->
@@ -25,23 +25,23 @@ kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 		y: req.params.y
 		format: req.params.format
 	#console.log req.get "Host"
-	cache.get opts.layer, opts.zoom, opts.x, opts.y, opts.format, (e,t,h)->
-		console.log "checking cache"
-		if e or !Buffer.isBuffer(t)
-			console.log "not in cache"
+	cache.get opts, (e,t,h)->
+		console.log "checking cache of " + JSON.stringify opts
+		if e
+			console.log "nope getting tile " + JSON.stringify opts
 			routes.getTile opts, (err, tile, head)->
-				if err
+				if err or !tile
 					res.json 404, err
 				else
 					if opts.format == "grid.json"
 						res.jsonp tile
-						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
+						cache.put opts, tile
 					else
 						res.set head
 						res.send tile
 						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
 		else
-			console.log "in cache"
+			#console.log "in cache " + JSON.stringify opts
 			if h 
 				res.set h
 				res.send t
