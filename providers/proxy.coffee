@@ -38,7 +38,7 @@ Proxy::getTile = (z,x,y, cb) ->
 	request url, {encoding:null}, (e,r,b)->
 		if e
 			cb e
-		else if r.statusCode == "404"
+		else if parseInt(r.statusCode) == 404
 			cb "not found"
 		else
 			#console.log r.headers["content-type"]

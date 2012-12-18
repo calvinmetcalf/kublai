@@ -23,7 +23,9 @@ quad = (z,x,y) ->
 Cache = (urls)->
 	@urls = urls.map (url)->
 		if process.env[url].slice(-1) != "/"
+		#if url.slice(-1) != "/"
 			url = process.env[url] + "/"
+			#url = url + "/"
 		else
 			url = process.env[url]
 	@
@@ -39,22 +41,32 @@ Cache::url = ()->
 Cache::get = (params..., cb)->
 	url = @url()
 	console.log "getting from #{url}"
-	if params.length == 4
-		[layer, z, x, y] = params
+	if params.length == 5
+		[layer, z, x, y, format] = params
 	else
 		cb "wrong number of args"
 		return
 	key = "#{ layer }-#{ quad(z,x,y) }"
-	request url + key + "/tile.png",{encoding:null}, (e,r,b)=>
+	if format == "grid.json"
+		finalUrl = url + key
+		opts = {json:true}
+	else
+		finalUrl = url + key + "/tile.png"
+		opts = {encoding:null}
+	request finalUrl,opts, (e,r,b)=>
 		if e or r.statusCode == 404
 			cb "nope"
 			return
-		else
+		else if format == "png"
 			cb null, b, {"etag":r.headers.etag,'content-type':r.headers['content-type'],'content-length':r.headers['content-length']}
-			request url + key, (e2,r2,b2)=>
+			request url + key,{json:true}, (e2,r2,b2)=>
 				b2.accessed = (new Date()).getTime()
-				request url +  key, {json : b2, method : "put"}
-
+				console.log "updating cache"
+				console.log b2
+				request url +  key, {json : b2, method : "put"}, (e3,r3,b3)->
+					console.log b3
+		else if format == "grid.json"
+			cb null, b
 Cache::put = (params..., tile)->
 	url = @url()
 	console.log "putting into #{url}"
@@ -69,6 +81,14 @@ Cache::put = (params..., tile)->
 		request url + doc._id, {method : "PUT", json : doc}, (e1,r1,b1)=>
 			if b1.error == "conflict"
 				request url + doc._id,{json:true}, (e2,r2,b2)=>
-					if b2.id == key
-						doc._rev = b2.rev
-						request url + doc._id, {method : "PUT", json : doc}
+						b2.attachments = doc._attachments
+						request url + doc._id, {method : "PUT", json : b2},(e3,r3,b3)->
+							console.log b3
+	else
+		doc = {_id : key, created : (new Date()).getTime(), accessed :(new Date()).getTime(), grid : tile}
+		request url + doc._id, {method : "PUT", json : doc}, (e1,r1,b1)=>
+			if b1.error == "conflict"
+				request url + doc._id,{json:true}, (e2,r2,b2)=>
+						b2.grid = doc.grid
+						request url + doc._id, {method : "PUT", json : b2},(e3,r3,b3)->
+							console.log b3

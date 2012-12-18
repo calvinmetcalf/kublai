@@ -43,6 +43,17 @@
 			"name": "Building Footprints"
 		}
    	},
+   	"Shields":{
+   		"type": "proxy",
+   		"options":{
+   			"tile" : "http://services.massdot.state.ma.us/ArcGIS/rest/services/GeneralPurpose/Shields/MapServer/tile/{z}/{y}/{x}"
+   		},
+		"info":{
+			"center" : [-71.0785,42.3422, 12],
+			"version" : "1.0.0",
+			"name": "Shields"
+		}
+   	},
    	"mqroads":{
    		"type":"blend",
    		"options":{
@@ -93,7 +104,19 @@
    	},"stamenTerrain":{
 		"type": "proxy",
 		"options":{
-			"tile" : "http://{s}.tile.stamen.com/terrain-background/{z}/{x}/{y}.jpg",
+			"tile" : "http://{s}.tile.stamen.com/terrain-background/{z}/{x}/{y}.png",
+			"subdomains":"abc"
+		},
+		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "stamenTerrain",
+			"attribution":"Map tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
+		}
+   	},"terrain":{
+		"type": "proxy",
+		"options":{
+			"tile" : "http://{s}.tile.stamen.com/terrain-background/{z}/{x}/{y}.png",
 			"subdomains":"abc"
 		},
 		"info":{
@@ -106,7 +129,7 @@
    	"stamenRoads":{
    		"type":"blend",
    		"options":{
-   			"layers":["stamenTerrain","Roads"]
+   			"layers":["terrain","Roads"]
    		},
    		"info":{
 			"center" : [-71,42.2, 8],
@@ -115,10 +138,22 @@
 			"attribution":"Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
    	},
+   	"shieldsRoads":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["Roads","Shields"]
+   		},
+   		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "Shields Roads",
+			"attribution":"Roads and Shieldsfrom MassDOT"
+		}
+   	},
    	"stamenBuildings":{
    		"type":"blend",
    		"options":{
-   			"layers":["stamenTerrain","FootPrints"]
+   			"layers":["terrain","FootPrints"]
    		},
    		"info":{
 			"center" : [-71.0785,42.3422, 12],
@@ -137,6 +172,18 @@
 			"version" : "1.0.0",
 			"name": "Footprints Roads terrain",
 			"attribution":"Footprints and Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
+		}
+   	},	
+   	"quad":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["stamenBuildings","shieldsRoads"]
+   		},
+   		"info":{
+			"center" : [-71.0785,42.3422, 12],
+			"version" : "1.0.0",
+			"name": "Footprints Roads shields and terrain",
+			"attribution":"Footprints, Shields, and Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
    	}
    }

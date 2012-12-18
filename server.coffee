@@ -25,7 +25,7 @@ kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 		y: req.params.y
 		format: req.params.format
 	#console.log req.get "Host"
-	cache.get opts.layer, opts.zoom, opts.x, opts.y, (e,t,h)->
+	cache.get opts.layer, opts.zoom, opts.x, opts.y, opts.format, (e,t,h)->
 		console.log "checking cache"
 		if e or !Buffer.isBuffer(t)
 			console.log "not in cache"
@@ -35,6 +35,7 @@ kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 				else
 					if opts.format == "grid.json"
 						res.jsonp tile
+						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
 					else
 						res.set head
 						res.send tile
@@ -44,6 +45,8 @@ kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 			if h 
 				res.set h
 				res.send t
+			else
+				res.jsonp t
 kublai.get '/:layer.:format', (req, res) ->
 	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, (err, tileJson)->
 		if err
