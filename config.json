@@ -93,7 +93,8 @@
 		"type": "proxy",
 		"options":{
 			"tile" : "http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png",
-			"subdomains":"1234"
+			"subdomains":"1234",
+			"since": 1355946867870
 		},
 		"info":{
 			"center" : [-71,42.2, 8],
@@ -174,7 +175,7 @@
 			"attribution":"Footprints and Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
    	},	
-   	"quad":{
+   	"four":{
    		"type":"blend",
    		"options":{
    			"layers":["stamenBuildings","shieldsRoads"]

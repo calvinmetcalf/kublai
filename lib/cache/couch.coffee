@@ -20,7 +20,8 @@ quad = (z,x,y) ->
 		return "z"
 
 
-Cache = (urls)->
+Cache = (urls, config)->
+	@config = config
 	@urls = urls.map (url)->
 		if process.env[url].slice(-1) != "/"
 		#if url.slice(-1) != "/"
@@ -31,8 +32,8 @@ Cache = (urls)->
 	@
 
 
-exports.cache = (opts)->
-	new Cache opts.db
+exports.cache = (opts, config)->
+	new Cache opts.db, config
 
 Cache::url = ()->
 	len = @urls.length
@@ -40,7 +41,7 @@ Cache::url = ()->
 
 Cache::get = (o, cb)->
 	url = @url()
-	#console.log "getting from #{url}"
+	console.log "getting from #{url}"
 	[layer, z, x, y, format] = [o.layer,o.zoom, o.x,o.y,o.format]
 	key = "#{ layer }-#{ quad(z,x,y) }"
 	if format == "grid.json"
@@ -55,12 +56,18 @@ Cache::get = (o, cb)->
 			cb "no such tile"
 			return
 		else if format == "png" and b._attachments
+			#if @config.layers[layer].options.since and ((b.created - @config.layers[layer].options.since) < 0)
+			#	cb "expired"
+			#	return
 			cb null, new Buffer(b._attachments["tile.png"].data, "base64"), {"etag":b._attachments["tile.png"].digest.slice(4),'content-type':b._attachments["tile.png"].content_type}
 			b.accessed = (new Date()).getTime()
-			console.log "updating cache"
+			#console.log "updating cache"
 			#console.log b
 			request url +  key, {json : b, method : "put"}
 		else if format == "grid.json" and b.grid
+			#if @config.layers[layer].options.since and (b.created - @config.layers[layer].options.since) < 0
+			#	cb "expired"
+			#	return
 			cb null, b.grid
 			b.accessed = (new Date()).getTime()
 			#console.log "updating cache"
@@ -71,19 +78,24 @@ Cache::get = (o, cb)->
 			#console.log "format: " + format + "and attachment: " + JSON.stringify b._attachments
 Cache::put = (o, tile)->
 	url = @url()
-	#console.log "putting into #{url}"
-	[layer, z, x, y,] = [o.layer,o.zoom, o.x,o.y]
+	console.log "putting into #{url}"
+	[layer, z, x, y] = [o.layer,o.zoom, o.x,o.y]
 	key = "#{ layer }-#{ quad(z,x,y) }"
+	#console.log JSON.stringify o
 	if Buffer.isBuffer tile
 		doc = {_id : key, created : (new Date()).getTime(), accessed :(new Date()).getTime(), _attachments:{"tile.png":{"content_type":"image\/png", data : tile.toString("base64")}}}
 		request url + doc._id, {method : "PUT", json : doc}, (e1,r1,b1)=>
+			#console.log JSON.stringify r1
 			if b1.error == "conflict"
 				request url + doc._id,{json:true}, (e2,r2,b2)=>
 						b2._attachments = doc._attachments
+						b2.created = doc.created
+						b2.accessed = doc.accessed
 						request url + doc._id, {method : "PUT", json : b2}
 	else
 		doc = {_id : key, created : (new Date()).getTime(), accessed :(new Date()).getTime(), grid : tile}
 		request url + doc._id, {method : "PUT", json : doc}, (e1,r1,b1)=>
+			#console.log JSON.stringify r1
 			if b1.error == "conflict"
 				request url + doc._id,{json:true}, (e2,r2,b2)=>
 						b2.grid = doc.grid

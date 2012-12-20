@@ -1,21 +1,21 @@
 express = require 'express'
-config = require './config.json'
-routes = require('./routes').open("./tiles", config)
+config = require '../config.json'
+routes = require('./routes').open("../tiles", config)
 fs = require 'fs'
 cache = require("./cache").open(config)
-preview = fs.readFileSync './preview.html', 'utf8'
+preview = fs.readFileSync './lib/preview.html', 'utf8'
 kublai = express()
 kublai.use express.compress()
 kublai.use express.favicon(__dirname + config.favicon)
 kublai.use express.bodyParser()
 kublai.use express.logger('dev') 
-kublai.use express.static(__dirname + '/public')
+kublai.use express.static('./public')
 
 kublai.get '/', (req, res)->
 	res.jsonp hello: "there"
 kublai.get '/stats', (req, res)->
 	numCPUs = require('os').cpus().length
-	res.jsonp num : numCPUs
+	res.jsonp num : numCPUs#, redis : process.env.VCAP_SERVICES
 kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 	#console.log "getting #{ req.path }"
 	opts =
@@ -26,9 +26,9 @@ kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 		format: req.params.format
 	#console.log req.get "Host"
 	cache.get opts, (e,t,h)->
-		console.log "checking cache of " + JSON.stringify opts
+		#console.log "checking cache of " + JSON.stringify opts
 		if e
-			console.log "nope getting tile " + JSON.stringify opts
+			#console.log "nope getting tile " + JSON.stringify opts
 			routes.getTile opts, (err, tile, head)->
 				if err or !tile
 					res.json 404, err
@@ -39,7 +39,7 @@ kublai.get '/:layer/:z/:x/:y.:format(png|grid.json)', (req, res) ->
 					else
 						res.set head
 						res.send tile
-						cache.put opts.layer, opts.zoom, opts.x, opts.y, tile
+						cache.put opts, tile
 		else
 			#console.log "in cache " + JSON.stringify opts
 			if h 
