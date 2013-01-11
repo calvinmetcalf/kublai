@@ -31,6 +31,8 @@
       ,"imagemagick":">=0.0.1"
       ,"request":">=0.0.1"
       ,"mbtiles":">=0.0.1"
+      ,"gm":">=0.0.1"
+      ,"socket.io":">=0.0.1"
   },
   "devDependencies": {},
   "bundleDependencies": [],

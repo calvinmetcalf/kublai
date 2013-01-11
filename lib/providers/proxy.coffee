@@ -1,5 +1,5 @@
 request = require 'request'
-im = require 'imagemagick'
+im = require('gm').subClass({ imageMagick: true })
 
 Proxy = (options)->
 	@url = options.tile
@@ -15,22 +15,28 @@ template = (str, data) ->
 		value = data[key]
 		throw new Error("No value provided for variable " + str)	unless data.hasOwnProperty(key)
 		value
-		
+
 toPNG = (jpg,cb)->
-	#console.log "to png"
-	opts =
-		srcData : jpg
-		format : "png"
-		srcFormat : "jpg"
-		width : 256
-	im.resize opts,(err, stdout)->
+	im(jpg).stream 'png', (err,stdout,stder)->
+		data = []
 		if err
-			#console.log "oh shit"
 			cb err
-		else
-			#console.log "all good"
-			cb null, new Buffer stdout, "binary"
-			
+			return
+		stdout.on 'data', (d)->
+			data.push d
+		stdout.on 'end', ()->
+			cb null, Buffer.concat data
+to8 = (png,cb)->
+	im(png).bitdepth(8).stream 'png', (err,stdout,stder)->
+		data = []
+		if err
+			cb err
+			return
+		stdout.on 'data', (d)->
+			data.push d
+		stdout.on 'end', ()->
+			cb null, Buffer.concat data
+
 Proxy::getTile = (z,x,y, cb) ->
 	opts = {z:z, x:x, y:y}
 	opts.s= @subdomains[Math.floor(Math.random() * @subdomains.length)] if "subdomains" of @
@@ -46,4 +52,9 @@ Proxy::getTile = (z,x,y, cb) ->
 				#console.log "converting"
 				toPNG b, cb
 			else
-				cb undefined, b
+				im(b).depth (err, value)->
+					#console.log value
+					unless value == 16
+						cb undefined, b
+					else
+						to8 b, cb

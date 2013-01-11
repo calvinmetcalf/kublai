@@ -1,10 +1,19 @@
 express = require 'express'
 config = require '../config.json'
+#io = require 'socket.io'
 routes = require('./routes').open("../tiles", config)
 fs = require 'fs'
 cache = require("./cache").open(config)
 preview = fs.readFileSync './lib/preview.html', 'utf8'
+#wsocket = fs.readFileSync './lib/io.html', 'utf8'
+f0f = fs.readFileSync './lib/404.jpg'
 kublai = express()
+#http = require('http')
+#server = http.createServer(kublai)
+#io = io.listen server
+#server.listen 8000
+#socks = require "./io"
+#socks.open io, routes
 kublai.use express.compress()
 kublai.use express.favicon(__dirname + config.favicon)
 kublai.use express.bodyParser()
@@ -58,14 +67,16 @@ kublai.get '/:layer.:format', (req, res) ->
 kublai.get '/:layer/tile.:format', (req, res) ->
 	routes.getTileJson {layer:req.params.layer,format:req.params.format, host:req.host,protocol : req.protocol}, (err, tileJson)->
 		if err
-			res.send 404
+			res.status(404).sendfile('./lib/404.jpg')
 			return
 		switch req.params.format
 				when "jsonp" then res.jsonp tileJson
 				when "json" then res.json tileJson
 kublai.get '/:layer/preview', (req, res)->
 	res.send preview
+#kublai.get '/:layer/io', (req, res)->
+#    res.send wsocket
 kublai.get '*', (req, res)->
-	res.send 404
+	res.status(404).sendfile('./lib/404.jpg')
 int = require './internals.coffee'
 int.run(kublai)

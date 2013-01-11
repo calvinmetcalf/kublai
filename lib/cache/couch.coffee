@@ -41,7 +41,7 @@ Cache::url = ()->
 
 Cache::get = (o, cb)->
 	url = @url()
-	console.log "getting from #{url}"
+	#console.log "getting from #{url}"
 	[layer, z, x, y, format] = [o.layer,o.zoom, o.x,o.y,o.format]
 	key = "#{ layer }-#{ quad(z,x,y) }"
 	if format == "grid.json"
@@ -56,9 +56,10 @@ Cache::get = (o, cb)->
 			cb "no such tile"
 			return
 		else if format == "png" and b._attachments
-			#if @config.layers[layer].options.since and ((b.created - @config.layers[layer].options.since) < 0)
-			#	cb "expired"
-			#	return
+			#console.log "#{key} created at #{b.created} and expires at #{@config.layers[layer].options.since} and dif is #{(b.created - @config.layers[layer].options.since)}"
+			if @config.layers[layer] and @config.layers[layer].options.since and ((b.created - @config.layers[layer].options.since) < 0)
+				cb "expired"
+				return
 			cb null, new Buffer(b._attachments["tile.png"].data, "base64"), {"etag":b._attachments["tile.png"].digest.slice(4),'content-type':b._attachments["tile.png"].content_type}
 			b.accessed = (new Date()).getTime()
 			#console.log "updating cache"

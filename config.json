@@ -32,6 +32,19 @@
 			"name": "MassDOT Roads"
 		}
    	},
+   	"top":{
+		"type": "proxy",
+		"options":{
+			"tile" : "http://{s}.tile.stamen.com/toposm-features/{z}/{x}/{y}.png",
+			"subdomains":"abc"
+		},
+		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "top",
+			"attribution":"Map by <a href ='http://wiki.openstreetmap.org/wiki/User:Ahlzen'>Lars Ahlzen</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
+		}
+   	},
    	"FootPrints":{
    		"type": "proxy",
    		"options":{
@@ -138,6 +151,17 @@
 			"name": "Terrain Roads",
 			"attribution":"Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
+   	},"toposm":{
+   		"type":"blend",
+   		"options":{
+   			"layers":["terrain","top"]
+   		},
+   		"info":{
+			"center" : [-71,42.2, 8],
+			"version" : "1.0.0",
+			"name": "Top OSM",
+			"attribution":"Map by <a href ='http://wiki.openstreetmap.org/wiki/User:Ahlzen'>Lars Ahlzen</a>, and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
+		}
    	},
    	"shieldsRoads":{
    		"type":"blend",
@@ -175,10 +199,11 @@
 			"attribution":"Footprints and Roads from MassDOT and Base tiles by <a href='http://stamen.com'>Stamen Design</a>, under <a href='http://creativecommons.org/licenses/by/3.0'>CC BY 3.0</a>. Data by <a href='http://openstreetmap.org'>OpenStreetMap</a>, under <a href='http://creativecommons.org/licenses/by-sa/3.0'>CC BY SA</a>."
 		}
    	},	
-   	"four":{
+   	"quad":{
    		"type":"blend",
    		"options":{
-   			"layers":["stamenBuildings","shieldsRoads"]
+   			"layers":["stamenBuildings","shieldsRoads"],
+   			"since":1357131866728
    		},
    		"info":{
 			"center" : [-71.0785,42.3422, 12],

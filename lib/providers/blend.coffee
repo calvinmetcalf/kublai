@@ -1,7 +1,7 @@
 Image = require 'image'
 pngparse = require 'pngparse'
 async = require 'async'
-im = require 'imagemagick'    
+
 
 flibA = (buff)->
 	i = 3
@@ -19,7 +19,7 @@ parsePng = (buff, cb)->
 			cb null, data.data
  
 composit = (buffs,cb)->
-	#console.log buffs.length
+	console.log buffs.length
 	if buffs.length == 1
 		cb null, buffs[0]
 		return
@@ -27,12 +27,19 @@ composit = (buffs,cb)->
 		cb(true)
 		return
 	async.map buffs, parsePng, (err, tiles)->
+		console.log tiles.length
 		if tiles.length == 0
 			cb true
 			return
 		else if tiles.length == 1
+			console.log "stop a"
 			cb null, buffs[0]
 			return
+		#else unless base
+		#	console.log "stop b"
+		#	cb null, buffs[0]
+		#	return
+		console.log "compositing"
 		base = tiles[0]
 		top = tiles[1]
 		i = 0
@@ -56,7 +63,7 @@ exports.open = (opt, routes) ->
 	new Blender opt, routes
 	
 Blender::getTile = (z,x,y, cb) ->
-	#console.log "getting"
+	console.log "getting"
 	opts={}
 	opts.zoom = z
 	opts.y = y
